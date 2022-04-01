@@ -1,0 +1,4 @@
+<paths>
+    <external-path name="log" path="LW004/"/>
+    <external-path name="*" path="."/>
+</paths>
