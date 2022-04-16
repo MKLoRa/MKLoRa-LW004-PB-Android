@@ -46,8 +46,6 @@ public class AxisSettingActivity extends BaseActivity {
     EditText etMotionThreshold;
     @BindView(R2.id.et_motion_duration)
     EditText etMotionDuration;
-    @BindView(R2.id.et_vibration_thresholds)
-    EditText etVibrationThresholds;
     private boolean mReceiverTag = false;
     private boolean savedParamsError;
 
@@ -65,9 +63,10 @@ public class AxisSettingActivity extends BaseActivity {
         mReceiverTag = true;
         showSyncingProgressDialog();
         ArrayList<OrderTask> orderTasks = new ArrayList<>();
-        orderTasks.add(OrderTaskAssembler.getWakeupCondition());
-        orderTasks.add(OrderTaskAssembler.getMotionDetection());
-        orderTasks.add(OrderTaskAssembler.getVibrationThreshold());
+        orderTasks.add(OrderTaskAssembler.getAccWakeupThreshold());
+        orderTasks.add(OrderTaskAssembler.getAccWakeupDuration());
+        orderTasks.add(OrderTaskAssembler.getAccMotionThreshold());
+        orderTasks.add(OrderTaskAssembler.getAccMotionDuration());
         LoRaLW004MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
     }
 
@@ -114,13 +113,14 @@ public class AxisSettingActivity extends BaseActivity {
                                 // write
                                 int result = value[4] & 0xFF;
                                 switch (configKeyEnum) {
-                                    case KEY_WAKEUP_CONDITION:
-                                    case KEY_MOTION_DETECTION:
+                                    case KEY_ACC_WAKEUP_THRESHOLD:
+                                    case KEY_ACC_WAKEUP_DURATION:
+                                    case KEY_ACC_MOTION_THRESHOLD:
                                         if (result != 1) {
                                             savedParamsError = true;
                                         }
                                         break;
-                                    case KEY_VIBRATION_THRESHOLD:
+                                    case KEY_ACC_MOTION_DURATION:
                                         if (result != 1) {
                                             savedParamsError = true;
                                         }
@@ -139,29 +139,33 @@ public class AxisSettingActivity extends BaseActivity {
                             if (flag == 0x00) {
                                 // read
                                 switch (configKeyEnum) {
-                                    case KEY_WAKEUP_CONDITION:
-                                        if (length > 1) {
-                                            int threshold = value[4] & 0xFF;
-                                            etWakeupThreshold.setText(String.valueOf(threshold));
-                                            int duration = value[5] & 0xFF;
-                                            etWakeupDuration.setText(String.valueOf(duration));
-                                        }
-                                        break;
-                                    case KEY_MOTION_DETECTION:
-                                        if (length > 1) {
-                                            int threshold = value[4] & 0xFF;
-                                            etMotionThreshold.setText(String.valueOf(threshold));
-                                            int duration = value[5] & 0xFF;
-                                            etMotionDuration.setText(String.valueOf(duration));
-                                        }
-                                        break;
-                                    case KEY_VIBRATION_THRESHOLD:
+                                    case KEY_ACC_WAKEUP_THRESHOLD:
                                         if (length > 0) {
                                             int threshold = value[4] & 0xFF;
-                                            etVibrationThresholds.setText(String.valueOf(threshold));
+                                            etWakeupThreshold.setText(String.valueOf(threshold));
 
                                         }
                                         break;
+                                    case KEY_ACC_WAKEUP_DURATION:
+                                        if (length > 0) {
+                                            int duration = value[4] & 0xFF;
+                                            etWakeupDuration.setText(String.valueOf(duration));
+                                        }
+                                        break;
+                                    case KEY_ACC_MOTION_THRESHOLD:
+                                        if (length > 0) {
+                                            int threshold = value[4] & 0xFF;
+                                            etMotionThreshold.setText(String.valueOf(threshold));
+
+                                        }
+                                        break;
+                                    case KEY_ACC_MOTION_DURATION:
+                                        if (length > 0) {
+                                            int duration = value[4] & 0xFF;
+                                            etMotionDuration.setText(String.valueOf(duration));
+                                        }
+                                        break;
+
                                 }
                             }
                         }
@@ -239,7 +243,7 @@ public class AxisSettingActivity extends BaseActivity {
             showSyncingProgressDialog();
             saveParams();
         } else {
-            ToastUtils.showToast(this, "Opps！Save failed. Please check the input characters and try again.");
+            ToastUtils.showToast(this, "Para error!");
         }
     }
 
@@ -268,12 +272,6 @@ public class AxisSettingActivity extends BaseActivity {
         final int motionDuration = Integer.parseInt(motionDurationStr);
         if (motionDuration < 1 || motionDuration > 50)
             return false;
-        final String vibrationThresholdStr = etVibrationThresholds.getText().toString();
-        if (TextUtils.isEmpty(vibrationThresholdStr))
-            return false;
-        final int vibrationThreshold = Integer.parseInt(vibrationThresholdStr);
-        if (vibrationThreshold < 10 || vibrationThreshold > 255)
-            return false;
         return true;
 
     }
@@ -287,13 +285,12 @@ public class AxisSettingActivity extends BaseActivity {
         final int motionThreshold = Integer.parseInt(motionThresholdStr);
         final String motionDurationStr = etMotionDuration.getText().toString();
         final int motionDuration = Integer.parseInt(motionDurationStr);
-        final String vibrationThresholdStr = etVibrationThresholds.getText().toString();
-        final int vibrationThreshold = Integer.parseInt(vibrationThresholdStr);
         savedParamsError = false;
         List<OrderTask> orderTasks = new ArrayList<>();
-        orderTasks.add(OrderTaskAssembler.setWakeupCondition(wakeUpThreshold, wakeUpDuration));
-        orderTasks.add(OrderTaskAssembler.setMotionDetection(motionThreshold, motionDuration));
-        orderTasks.add(OrderTaskAssembler.setVibrationThreshold(vibrationThreshold));
+        orderTasks.add(OrderTaskAssembler.setAccWakeupThreshold(wakeUpThreshold));
+        orderTasks.add(OrderTaskAssembler.setAccWakeupDuration(wakeUpDuration));
+        orderTasks.add(OrderTaskAssembler.setAccMotionThreshold(motionThreshold));
+        orderTasks.add(OrderTaskAssembler.setAccMotionDuration(motionDuration));
         LoRaLW004MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
     }
 }

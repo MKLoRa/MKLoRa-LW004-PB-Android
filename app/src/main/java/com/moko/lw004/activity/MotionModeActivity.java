@@ -75,11 +75,8 @@ public class MotionModeActivity extends BaseActivity {
     private boolean savedParamsError;
     private ArrayList<String> mValues;
     private int mStartSelected;
-    private int mStartShowSelected;
     private int mTripSelected;
-    private int mTripShowSelected;
     private int mEndSelected;
-    private int mEndShowSelected;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,13 +84,9 @@ public class MotionModeActivity extends BaseActivity {
         setContentView(R.layout.lw004_activity_motion_mode);
         ButterKnife.bind(this);
         mValues = new ArrayList<>();
-        mValues.add("WIFI");
         mValues.add("BLE");
         mValues.add("GPS");
-        mValues.add("WIFI+GPS");
-        mValues.add("BLE+GPS");
-        mValues.add("WIFI+BLE");
-        mValues.add("WIFI+BLE+GPS");
+        mValues.add("BLE&GPS");
         EventBus.getDefault().register(this);
         // 注册广播接收器
         IntentFilter filter = new IntentFilter();
@@ -107,7 +100,7 @@ public class MotionModeActivity extends BaseActivity {
         orderTasks.add(OrderTaskAssembler.getMotionStartPosStrategy());
         orderTasks.add(OrderTaskAssembler.getMotionTripInterval());
         orderTasks.add(OrderTaskAssembler.getMotionTripPosStrategy());
-        orderTasks.add(OrderTaskAssembler.getMotionEndTimeout());
+        orderTasks.add(OrderTaskAssembler.getAccMotionEndTimeout());
         orderTasks.add(OrderTaskAssembler.getMotionEndNumber());
         orderTasks.add(OrderTaskAssembler.getMotionEndInterval());
         orderTasks.add(OrderTaskAssembler.getMotionEndPosStrategy());
@@ -161,7 +154,7 @@ public class MotionModeActivity extends BaseActivity {
                                     case KEY_MOTION_MODE_START_POS_STRATEGY:
                                     case KEY_MOTION_MODE_TRIP_REPORT_INTERVAL:
                                     case KEY_MOTION_MODE_TRIP_POS_STRATEGY:
-                                    case KEY_MOTION_MODE_END_TIMEOUT:
+                                    case KEY_ACC_MOTION_END_TIMEOUT:
                                     case KEY_MOTION_MODE_END_NUMBER:
                                     case KEY_MOTION_MODE_END_REPORT_INTERVAL:
                                     case KEY_MOTION_MODE_END_POS_STRATEGY:
@@ -191,12 +184,12 @@ public class MotionModeActivity extends BaseActivity {
                                     case KEY_MOTION_MODE_EVENT:
                                         if (length > 0) {
                                             int modeEvent = value[4] & 0xFF;
-                                            cbNotifyOnStart.setChecked((modeEvent & 1) == 1);
-                                            cbFixOnStart.setChecked((modeEvent & 2) == 2);
-                                            cbNotifyInTrip.setChecked((modeEvent & 4) == 4);
-                                            cbFixInTrip.setChecked((modeEvent & 8) == 8);
-                                            cbNotifyOnEnd.setChecked((modeEvent & 16) == 16);
-                                            cbFixOnEnd.setChecked((modeEvent & 32) == 32);
+                                            cbFixOnStart.setChecked((modeEvent & 1) == 1);
+                                            cbFixInTrip.setChecked((modeEvent & 2) == 2);
+                                            cbFixOnEnd.setChecked((modeEvent & 4) == 4);
+                                            cbNotifyOnStart.setChecked((modeEvent & 8) == 8);
+                                            cbNotifyInTrip.setChecked((modeEvent & 16) == 16);
+                                            cbNotifyOnEnd.setChecked((modeEvent & 32) == 32);
                                         }
                                         break;
                                     case KEY_MOTION_MODE_START_NUMBER:
@@ -209,22 +202,7 @@ public class MotionModeActivity extends BaseActivity {
                                         if (length > 0) {
                                             int strategy = value[4] & 0xFF;
                                             mStartSelected = strategy;
-                                            if (strategy == 1) {
-                                                mStartShowSelected = 0;
-                                            } else if (strategy == 2) {
-                                                mStartShowSelected = 1;
-                                            } else if (strategy == 3) {
-                                                mStartShowSelected = 5;
-                                            } else if (strategy == 4) {
-                                                mStartShowSelected = 2;
-                                            } else if (strategy == 5) {
-                                                mStartShowSelected = 3;
-                                            } else if (strategy == 6) {
-                                                mStartShowSelected = 4;
-                                            } else if (strategy == 7) {
-                                                mStartShowSelected = 6;
-                                            }
-                                            tvPosStrategyOnStart.setText(mValues.get(mStartShowSelected));
+                                            tvPosStrategyOnStart.setText(mValues.get(mStartSelected));
                                         }
                                         break;
                                     case KEY_MOTION_MODE_TRIP_REPORT_INTERVAL:
@@ -238,25 +216,10 @@ public class MotionModeActivity extends BaseActivity {
                                         if (length > 0) {
                                             int strategy = value[4] & 0xFF;
                                             mTripSelected = strategy;
-                                            if (strategy == 1) {
-                                                mTripShowSelected = 0;
-                                            } else if (strategy == 2) {
-                                                mTripShowSelected = 1;
-                                            } else if (strategy == 3) {
-                                                mTripShowSelected = 5;
-                                            } else if (strategy == 4) {
-                                                mTripShowSelected = 2;
-                                            } else if (strategy == 5) {
-                                                mTripShowSelected = 3;
-                                            } else if (strategy == 6) {
-                                                mTripShowSelected = 4;
-                                            } else if (strategy == 7) {
-                                                mTripShowSelected = 6;
-                                            }
-                                            tvPosStrategyInTrip.setText(mValues.get(mTripShowSelected));
+                                            tvPosStrategyInTrip.setText(mValues.get(mTripSelected));
                                         }
                                         break;
-                                    case KEY_MOTION_MODE_END_TIMEOUT:
+                                    case KEY_ACC_MOTION_END_TIMEOUT:
                                         if (length > 0) {
                                             int timeout = value[4] & 0xFF;
                                             etTripEndTimeout.setText(String.valueOf(timeout));
@@ -279,22 +242,7 @@ public class MotionModeActivity extends BaseActivity {
                                         if (length > 0) {
                                             int strategy = value[4] & 0xFF;
                                             mEndSelected = strategy;
-                                            if (strategy == 1) {
-                                                mEndShowSelected = 0;
-                                            } else if (strategy == 2) {
-                                                mEndShowSelected = 1;
-                                            } else if (strategy == 3) {
-                                                mEndShowSelected = 5;
-                                            } else if (strategy == 4) {
-                                                mEndShowSelected = 2;
-                                            } else if (strategy == 5) {
-                                                mEndShowSelected = 3;
-                                            } else if (strategy == 6) {
-                                                mEndShowSelected = 4;
-                                            } else if (strategy == 7) {
-                                                mEndShowSelected = 6;
-                                            }
-                                            tvPosStrategyOnEnd.setText(mValues.get(mEndShowSelected));
+                                            tvPosStrategyOnEnd.setText(mValues.get(mEndSelected));
                                         }
                                         break;
                                 }
@@ -374,7 +322,7 @@ public class MotionModeActivity extends BaseActivity {
             showSyncingProgressDialog();
             saveParams();
         } else {
-            ToastUtils.showToast(this, "Opps！Save failed. Please check the input characters and try again.");
+            ToastUtils.showToast(this, "Para error!");
         }
     }
 
@@ -431,16 +379,16 @@ public class MotionModeActivity extends BaseActivity {
         orderTasks.add(OrderTaskAssembler.setMotionStartPosStrategy(mStartSelected));
         orderTasks.add(OrderTaskAssembler.setMotionTripInterval(intervalTrip));
         orderTasks.add(OrderTaskAssembler.setMotionTripPosStrategy(mTripSelected));
-        orderTasks.add(OrderTaskAssembler.setMotionEndTimeout(endTimeout));
+        orderTasks.add(OrderTaskAssembler.setAccMotionEndTimeout(endTimeout));
         orderTasks.add(OrderTaskAssembler.setMotionEndNumber(endNumber));
         orderTasks.add(OrderTaskAssembler.setMotionEndInterval(endInterval));
         orderTasks.add(OrderTaskAssembler.setMotionEndPosStrategy(mEndSelected));
-        int motionMode = (cbNotifyOnStart.isChecked() ? 1 : 0)
-                | (cbFixOnStart.isChecked() ? 2 : 0)
-                | (cbNotifyInTrip.isChecked() ? 4 : 0)
-                | (cbFixInTrip.isChecked() ? 8 : 0)
-                | (cbNotifyOnEnd.isChecked() ? 16 : 0)
-                | (cbFixOnEnd.isChecked() ? 32 : 0);
+        int motionMode = (cbFixOnStart.isChecked() ? 1 : 0)
+                | (cbFixInTrip.isChecked() ? 2 : 0)
+                | (cbFixOnEnd.isChecked() ? 4 : 0)
+                | (cbNotifyOnStart.isChecked() ? 8 : 0)
+                | (cbNotifyInTrip.isChecked() ? 16 : 0)
+                | (cbNotifyOnEnd.isChecked() ? 32 : 0);
         orderTasks.add(OrderTaskAssembler.setMotionModeEvent(motionMode));
         LoRaLW004MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
     }
@@ -449,24 +397,9 @@ public class MotionModeActivity extends BaseActivity {
         if (isWindowLocked())
             return;
         BottomDialog dialog = new BottomDialog();
-        dialog.setDatas(mValues, mStartShowSelected);
+        dialog.setDatas(mValues, mStartSelected);
         dialog.setListener(value -> {
-            mStartShowSelected = value;
-            if (value == 0) {
-                mStartSelected = 1;
-            } else if (value == 1) {
-                mStartSelected = 2;
-            } else if (value == 2) {
-                mStartSelected = 4;
-            } else if (value == 3) {
-                mStartSelected = 5;
-            } else if (value == 4) {
-                mStartSelected = 6;
-            } else if (value == 5) {
-                mStartSelected = 3;
-            } else if (value == 6) {
-                mStartSelected = 7;
-            }
+            mStartSelected = value;
             tvPosStrategyOnStart.setText(mValues.get(value));
         });
         dialog.show(getSupportFragmentManager());
@@ -476,24 +409,9 @@ public class MotionModeActivity extends BaseActivity {
         if (isWindowLocked())
             return;
         BottomDialog dialog = new BottomDialog();
-        dialog.setDatas(mValues, mTripShowSelected);
+        dialog.setDatas(mValues, mTripSelected);
         dialog.setListener(value -> {
-            mTripShowSelected = value;
-            if (value == 0) {
-                mTripSelected = 1;
-            } else if (value == 1) {
-                mTripSelected = 2;
-            } else if (value == 2) {
-                mTripSelected = 4;
-            } else if (value == 3) {
-                mTripSelected = 5;
-            } else if (value == 4) {
-                mTripSelected = 6;
-            } else if (value == 5) {
-                mTripSelected = 3;
-            } else if (value == 6) {
-                mTripSelected = 7;
-            }
+            mTripSelected = value;
             tvPosStrategyInTrip.setText(mValues.get(value));
         });
         dialog.show(getSupportFragmentManager());
@@ -503,24 +421,9 @@ public class MotionModeActivity extends BaseActivity {
         if (isWindowLocked())
             return;
         BottomDialog dialog = new BottomDialog();
-        dialog.setDatas(mValues, mEndShowSelected);
+        dialog.setDatas(mValues, mEndSelected);
         dialog.setListener(value -> {
-            mEndShowSelected = value;
-            if (value == 0) {
-                mEndSelected = 1;
-            } else if (value == 1) {
-                mEndSelected = 2;
-            } else if (value == 2) {
-                mEndSelected = 4;
-            } else if (value == 3) {
-                mEndSelected = 5;
-            } else if (value == 4) {
-                mEndSelected = 6;
-            } else if (value == 5) {
-                mEndSelected = 3;
-            } else if (value == 6) {
-                mEndSelected = 7;
-            }
+            mEndSelected = value;
             tvPosStrategyOnEnd.setText(mValues.get(value));
         });
         dialog.show(getSupportFragmentManager());

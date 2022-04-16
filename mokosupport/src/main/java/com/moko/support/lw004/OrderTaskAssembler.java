@@ -6,6 +6,7 @@ import com.moko.support.lw004.task.GetFirmwareRevisionTask;
 import com.moko.support.lw004.task.GetHardwareRevisionTask;
 import com.moko.support.lw004.task.GetManufacturerNameTask;
 import com.moko.support.lw004.task.GetModelNumberTask;
+import com.moko.support.lw004.task.GetSerialNumberTask;
 import com.moko.support.lw004.task.GetSoftwareRevisionTask;
 import com.moko.support.lw004.task.ParamsReadTask;
 import com.moko.support.lw004.task.ParamsWriteTask;
@@ -30,6 +31,11 @@ public class OrderTaskAssembler {
         return getDeviceModelTask;
     }
 
+    public static OrderTask getSerialNumber() {
+        GetSerialNumberTask getSerialNumberTask = new GetSerialNumberTask();
+        return getSerialNumberTask;
+    }
+
     public static OrderTask getHardwareVersion() {
         GetHardwareRevisionTask getHardwareVersionTask = new GetHardwareRevisionTask();
         return getHardwareVersionTask;
@@ -45,17 +51,62 @@ public class OrderTaskAssembler {
         return getSoftwareVersionTask;
     }
 
-    public static OrderTask getBattery() {
+    public static OrderTask getVoltage() {
         ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_BATTERY_POWER);
+        task.setData(ParamsKeyEnum.KEY_VOLTAGE);
         return task;
     }
 
-    public static OrderTask getMacAddress() {
+    public static OrderTask getBtnCloseEnable() {
         ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_CHIP_MAC);
+        task.setData(ParamsKeyEnum.KEY_BUTTON_CLOSE_ENABLE);
         return task;
     }
+
+
+    public static OrderTask getLowPowerPercent() {
+        ParamsReadTask task = new ParamsReadTask();
+        task.setData(ParamsKeyEnum.KEY_LOW_POWER_PERCENT);
+        return task;
+    }
+
+    public static OrderTask getLowPowerReportEnable() {
+        ParamsReadTask task = new ParamsReadTask();
+        task.setData(ParamsKeyEnum.KEY_LOW_POWER_REPORT_ENABLE);
+        return task;
+    }
+
+    public static OrderTask getAdvName() {
+        ParamsReadTask task = new ParamsReadTask();
+        task.setData(ParamsKeyEnum.KEY_ADV_NAME);
+        return task;
+    }
+
+    public static OrderTask getAdvInterval() {
+        ParamsReadTask task = new ParamsReadTask();
+        task.setData(ParamsKeyEnum.KEY_ADV_INTERVAL);
+        return task;
+    }
+
+    public static OrderTask getAdvTxPower() {
+        ParamsReadTask task = new ParamsReadTask();
+        task.setData(ParamsKeyEnum.KEY_ADV_TX_POWER);
+        return task;
+    }
+
+
+    public static OrderTask getAdvTimeout() {
+        ParamsReadTask task = new ParamsReadTask();
+        task.setData(ParamsKeyEnum.KEY_ADV_TIMEOUT);
+        return task;
+    }
+
+    public static OrderTask getPasswordVerifyEnable() {
+        ParamsReadTask task = new ParamsReadTask();
+        task.setData(ParamsKeyEnum.KEY_PASSWORD_VERIFY_ENABLE);
+        return task;
+    }
+
 
     public static OrderTask getTimeZone() {
         ParamsReadTask task = new ParamsReadTask();
@@ -63,17 +114,66 @@ public class OrderTaskAssembler {
         return task;
     }
 
-    public static OrderTask getWorkMode() {
+    public static OrderTask getTimeUTC() {
         ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_WORK_MODE);
+        task.setData(ParamsKeyEnum.KEY_TIME_UTC);
         return task;
     }
 
-    public static OrderTask getPowerStatus() {
+    public static OrderTask getAccWakeupThreshold() {
         ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_POWER_STATUS);
+        task.setData(ParamsKeyEnum.KEY_ACC_WAKEUP_THRESHOLD);
         return task;
     }
+
+    public static OrderTask getAccWakeupDuration() {
+        ParamsReadTask task = new ParamsReadTask();
+        task.setData(ParamsKeyEnum.KEY_ACC_WAKEUP_DURATION);
+        return task;
+    }
+
+    public static OrderTask getAccMotionThreshold() {
+        ParamsReadTask task = new ParamsReadTask();
+        task.setData(ParamsKeyEnum.KEY_ACC_MOTION_THRESHOLD);
+        return task;
+    }
+
+    public static OrderTask getAccMotionDuration() {
+        ParamsReadTask task = new ParamsReadTask();
+        task.setData(ParamsKeyEnum.KEY_ACC_MOTION_DURATION);
+        return task;
+    }
+
+    public static OrderTask getAccMotionEndTimeout() {
+        ParamsReadTask task = new ParamsReadTask();
+        task.setData(ParamsKeyEnum.KEY_ACC_MOTION_END_TIMEOUT);
+        return task;
+    }
+
+    public static OrderTask getStartAdv() {
+        ParamsReadTask task = new ParamsReadTask();
+        task.setData(ParamsKeyEnum.KEY_START_ADV);
+        return task;
+    }
+
+    public static OrderTask getMac() {
+        ParamsReadTask task = new ParamsReadTask();
+        task.setData(ParamsKeyEnum.KEY_MAC);
+        return task;
+    }
+
+    public static OrderTask getShutdownPayloadEnable() {
+        ParamsReadTask task = new ParamsReadTask();
+        task.setData(ParamsKeyEnum.KEY_SHUTDOWN_PAYLOAD_ENABLE);
+        return task;
+    }
+
+    public static OrderTask getDeviceMode() {
+        ParamsReadTask task = new ParamsReadTask();
+        task.setData(ParamsKeyEnum.KEY_DEVICE_MODE);
+        return task;
+    }
+
 
     public static OrderTask getHeartBeatInterval() {
         ParamsReadTask task = new ParamsReadTask();
@@ -81,33 +181,10 @@ public class OrderTaskAssembler {
         return task;
     }
 
-    public static OrderTask getReedSwitch() {
-        ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_REED_SWITCH);
-        return task;
-    }
 
-    public static OrderTask getShutdownInfoReport() {
+    public static OrderTask getPeriodicReportInterval() {
         ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_SHUTDOWN_INFO_REPORT);
-        return task;
-    }
-
-    public static OrderTask getOfflineLocation() {
-        ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_OFFLINE_LOCATION);
-        return task;
-    }
-
-    public static OrderTask getLowPower() {
-        ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_LOW_POWER);
-        return task;
-    }
-
-    public static OrderTask getIndicatorLight() {
-        ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_INDICATOR_LIGHT);
+        task.setData(ParamsKeyEnum.KEY_PERIODIC_MODE_REPORT_INTERVAL);
         return task;
     }
 
@@ -117,9 +194,9 @@ public class OrderTaskAssembler {
         return task;
     }
 
-    public static OrderTask getPeriodicReportInterval() {
+    public static OrderTask getTimePosReportPoints() {
         ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_PERIODIC_MODE_REPORT_INTERVAL);
+        task.setData(ParamsKeyEnum.KEY_TIME_MODE_REPORT_TIME_POINT);
         return task;
     }
 
@@ -129,21 +206,9 @@ public class OrderTaskAssembler {
         return task;
     }
 
-    public static OrderTask getTimePosReportPoints() {
-        ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_TIME_MODE_REPORT_TIME_POINT);
-        return task;
-    }
-
     public static OrderTask getMotionModeEvent() {
         ParamsReadTask task = new ParamsReadTask();
         task.setData(ParamsKeyEnum.KEY_MOTION_MODE_EVENT);
-        return task;
-    }
-
-    public static OrderTask getMotionModeStartNumber() {
-        ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_MOTION_MODE_START_NUMBER);
         return task;
     }
 
@@ -153,9 +218,9 @@ public class OrderTaskAssembler {
         return task;
     }
 
-    public static OrderTask getMotionTripInterval() {
+    public static OrderTask getMotionModeStartNumber() {
         ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_MOTION_MODE_TRIP_REPORT_INTERVAL);
+        task.setData(ParamsKeyEnum.KEY_MOTION_MODE_START_NUMBER);
         return task;
     }
 
@@ -166,9 +231,16 @@ public class OrderTaskAssembler {
         return task;
     }
 
-    public static OrderTask getMotionEndTimeout() {
+    public static OrderTask getMotionTripInterval() {
         ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_MOTION_MODE_END_TIMEOUT);
+        task.setData(ParamsKeyEnum.KEY_MOTION_MODE_TRIP_REPORT_INTERVAL);
+        return task;
+    }
+
+
+    public static OrderTask getMotionEndPosStrategy() {
+        ParamsReadTask task = new ParamsReadTask();
+        task.setData(ParamsKeyEnum.KEY_MOTION_MODE_END_POS_STRATEGY);
         return task;
     }
 
@@ -184,27 +256,130 @@ public class OrderTaskAssembler {
         return task;
     }
 
-    public static OrderTask getMotionEndPosStrategy() {
-        ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_MOTION_MODE_END_POS_STRATEGY);
-        return task;
-    }
-
     public static OrderTask getDownLinkPosStrategy() {
         ParamsReadTask task = new ParamsReadTask();
         task.setData(ParamsKeyEnum.KEY_DOWN_LINK_POS_STRATEGY);
         return task;
     }
 
-    public static OrderTask getWifiPosNumber() {
+    public static OrderTask getManDownDetectionEnable() {
         ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_WIFI_POS_NUMBER);
+        task.setData(ParamsKeyEnum.KEY_MAN_DOWN_DETECTION_ENABLE);
         return task;
     }
 
-    public static OrderTask getWifiPosBSSIDNumber() {
+    public static OrderTask getManDownPosStrategy() {
         ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_WIFI_POS_BSSID_NUMBER);
+        task.setData(ParamsKeyEnum.KEY_MAN_DOWN_POS_STRATEGY);
+        return task;
+    }
+
+    public static OrderTask getManDownDetectionTimeout() {
+        ParamsReadTask task = new ParamsReadTask();
+        task.setData(ParamsKeyEnum.KEY_MAN_DOWN_DETECTION_TIMEOUT);
+        return task;
+    }
+
+    public static OrderTask getManDownReportInterval() {
+        ParamsReadTask task = new ParamsReadTask();
+        task.setData(ParamsKeyEnum.KEY_MAN_DOWN_REPORT_INTERVAL);
+        return task;
+    }
+
+    public static OrderTask getManDownStartEventNotifyEnable() {
+        ParamsReadTask task = new ParamsReadTask();
+        task.setData(ParamsKeyEnum.KEY_MAN_DOWN_START_EVENT_NOTIFY_ENABLE);
+        return task;
+    }
+
+    public static OrderTask getManDownEndEventNotifyEnable() {
+        ParamsReadTask task = new ParamsReadTask();
+        task.setData(ParamsKeyEnum.KEY_MAN_DOWN_END_EVENT_NOTIFY_ENABLE);
+        return task;
+    }
+
+    public static OrderTask getVibrationIntensity() {
+        ParamsReadTask task = new ParamsReadTask();
+        task.setData(ParamsKeyEnum.KEY_VIBRATION_INTENSITY);
+        return task;
+    }
+
+    public static OrderTask getAlarmType() {
+        ParamsReadTask task = new ParamsReadTask();
+        task.setData(ParamsKeyEnum.KEY_ALARM_TYPE);
+        return task;
+    }
+
+    public static OrderTask getAlarmExitPressDuration() {
+        ParamsReadTask task = new ParamsReadTask();
+        task.setData(ParamsKeyEnum.KEY_ALARM_EXIT_PRESS_DURATION);
+        return task;
+    }
+
+    public static OrderTask getAlarmSosStartEventNotifyEnable() {
+        ParamsReadTask task = new ParamsReadTask();
+        task.setData(ParamsKeyEnum.KEY_ALARM_SOS_START_EVENT_NOTIFY_ENABLE);
+        return task;
+    }
+
+    public static OrderTask getAlarmSosEndEventNotifyEnable() {
+        ParamsReadTask task = new ParamsReadTask();
+        task.setData(ParamsKeyEnum.KEY_ALARM_SOS_END_EVENT_NOTIFY_ENABLE);
+        return task;
+    }
+
+
+    public static OrderTask getAlarmSosPosStrategy() {
+        ParamsReadTask task = new ParamsReadTask();
+        task.setData(ParamsKeyEnum.KEY_ALARM_SOS_POS_STRATEGY);
+        return task;
+    }
+
+    public static OrderTask getAlarmSosReportInterval() {
+        ParamsReadTask task = new ParamsReadTask();
+        task.setData(ParamsKeyEnum.KEY_ALARM_SOS_REPORT_INTERVAL);
+        return task;
+    }
+
+    public static OrderTask getAlarmSosTriggerMode() {
+        ParamsReadTask task = new ParamsReadTask();
+        task.setData(ParamsKeyEnum.KEY_ALARM_SOS_TRIGGER_MODE);
+        return task;
+    }
+
+    public static OrderTask getAlarmAlertStartEventNotifyEnable() {
+        ParamsReadTask task = new ParamsReadTask();
+        task.setData(ParamsKeyEnum.KEY_ALARM_ALERT_START_EVENT_NOTIFY_ENABLE);
+        return task;
+    }
+
+    public static OrderTask getAlarmAlertEndEventNotifyEnable() {
+        ParamsReadTask task = new ParamsReadTask();
+        task.setData(ParamsKeyEnum.KEY_ALARM_ALERT_END_EVENT_NOTIFY_ENABLE);
+        return task;
+    }
+
+    public static OrderTask getAlarmAlertPosStrategy() {
+        ParamsReadTask task = new ParamsReadTask();
+        task.setData(ParamsKeyEnum.KEY_ALARM_ALERT_POS_STRATEGY);
+        return task;
+    }
+
+    public static OrderTask getAlarmAlertTriggerMode() {
+        ParamsReadTask task = new ParamsReadTask();
+        task.setData(ParamsKeyEnum.KEY_ALARM_ALERT_TRIGGER_MODE);
+        return task;
+    }
+
+    public static OrderTask getGPSPosTimeout() {
+        ParamsReadTask task = new ParamsReadTask();
+        task.setData(ParamsKeyEnum.KEY_GPS_POS_TIMEOUT);
+        return task;
+    }
+
+    public static OrderTask getGPSPDOPLimit() {
+        ParamsReadTask task = new ParamsReadTask();
+        task.setData(ParamsKeyEnum.KEY_GPS_PDOP_LIMIT);
         return task;
     }
 
@@ -220,186 +395,204 @@ public class OrderTaskAssembler {
         return task;
     }
 
-    public static OrderTask getFilterABRelation() {
+    public static OrderTask getFilterRSSI() {
         ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_FILTER_A_B_RELATION);
+        task.setData(ParamsKeyEnum.KEY_FILTER_RSSI);
         return task;
     }
 
-    public static OrderTask getFilterSwitchA() {
+    public static OrderTask getFilterRelationship() {
         ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_FILTER_SWITCH_A);
+        task.setData(ParamsKeyEnum.KEY_FILTER_RELATIONSHIP);
         return task;
     }
 
-    public static OrderTask getFilterNameA() {
+    public static OrderTask getFilterMacPrecise() {
         ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_FILTER_ADV_NAME_A);
+        task.setData(ParamsKeyEnum.KEY_FILTER_MAC_PRECISE);
         return task;
     }
 
-
-    public static OrderTask getFilterMacA() {
+    public static OrderTask getFilterMacReverse() {
         ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_FILTER_MAC_A);
+        task.setData(ParamsKeyEnum.KEY_FILTER_MAC_REVERSE);
         return task;
     }
 
-    public static OrderTask getFilterMajorRangeA() {
+    public static OrderTask getFilterMacRules() {
         ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_FILTER_MAJOR_RANGE_A);
+        task.setData(ParamsKeyEnum.KEY_FILTER_MAC_RULES);
         return task;
     }
 
-    public static OrderTask getFilterMinorRangeA() {
+    public static OrderTask getFilterNamePrecise() {
         ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_FILTER_MINOR_RANGE_A);
+        task.setData(ParamsKeyEnum.KEY_FILTER_NAME_PRECISE);
         return task;
     }
 
-    public static OrderTask getFilterRawDataA() {
+    public static OrderTask getFilterNameReverse() {
         ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_FILTER_ADV_RAW_DATA_A);
+        task.setData(ParamsKeyEnum.KEY_FILTER_NAME_REVERSE);
         return task;
     }
 
-    public static OrderTask getFilterUUIDA() {
+    public static OrderTask getFilterNameRules() {
         ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_FILTER_UUID_A);
+        task.getFilterName();
         return task;
     }
 
-    public static OrderTask getFilterRssiA() {
+    public static OrderTask getFilterRawData() {
         ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_FILTER_RSSI_A);
+        task.setData(ParamsKeyEnum.KEY_FILTER_RAW_DATA);
         return task;
     }
 
-    public static OrderTask getFilterSwitchB() {
+    public static OrderTask getFilterIBeaconEnable() {
         ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_FILTER_SWITCH_B);
+        task.setData(ParamsKeyEnum.KEY_FILTER_IBEACON_ENABLE);
         return task;
     }
 
-    public static OrderTask getFilterNameB() {
+    public static OrderTask getFilterIBeaconMajorRange() {
         ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_FILTER_ADV_NAME_B);
+        task.setData(ParamsKeyEnum.KEY_FILTER_IBEACON_MAJOR_RANGE);
         return task;
     }
 
-    public static OrderTask getFilterMacB() {
+    public static OrderTask getFilterIBeaconMinorRange() {
         ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_FILTER_MAC_B);
+        task.setData(ParamsKeyEnum.KEY_FILTER_IBEACON_MINOR_RANGE);
         return task;
     }
 
-    public static OrderTask getFilterMajorRangeB() {
+    public static OrderTask getFilterIBeaconUUID() {
         ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_FILTER_MAJOR_RANGE_B);
+        task.setData(ParamsKeyEnum.KEY_FILTER_IBEACON_UUID);
         return task;
     }
 
-    public static OrderTask getFilterMinorRangeB() {
+    public static OrderTask getFilterMKIBeaconEnable() {
         ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_FILTER_MINOR_RANGE_B);
+        task.setData(ParamsKeyEnum.KEY_FILTER_MKIBEACON_ENABLE);
         return task;
     }
 
-    public static OrderTask getFilterRawDataB() {
+    public static OrderTask getFilterMKIBeaconMajorRange() {
         ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_FILTER_ADV_RAW_DATA_B);
+        task.setData(ParamsKeyEnum.KEY_FILTER_MKIBEACON_MAJOR_RANGE);
         return task;
     }
 
-    public static OrderTask getFilterUUIDB() {
+    public static OrderTask getFilterMKIBeaconMinorRange() {
         ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_FILTER_UUID_B);
+        task.setData(ParamsKeyEnum.KEY_FILTER_MKIBEACON_MINOR_RANGE);
         return task;
     }
 
-    public static OrderTask getFilterRssiB() {
+    public static OrderTask getFilterMKIBeaconUUID() {
         ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_FILTER_RSSI_B);
+        task.setData(ParamsKeyEnum.KEY_FILTER_MKIBEACON_UUID);
         return task;
     }
 
-    public static OrderTask getGPSColdStartTimeout() {
+    public static OrderTask getFilterMKIBeaconAccEnable() {
         ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_GPS_COLD_START_TIMEOUT);
+        task.setData(ParamsKeyEnum.KEY_FILTER_MKIBEACON_ACC_ENABLE);
         return task;
     }
 
-    public static OrderTask getGPSCoarseAccuracyMask() {
+    public static OrderTask getFilterMKIBeaconAccMajorRange() {
         ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_GPS_COARSE_ACCURACY_MASK);
+        task.setData(ParamsKeyEnum.KEY_FILTER_MKIBEACON_ACC_MAJOR_RANGE);
         return task;
     }
 
-    public static OrderTask getGPSFineAccuracyMask() {
+    public static OrderTask getFilterMKIBeaconAccMinorRange() {
         ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_GPS_FINE_ACCURACY_MASK);
+        task.setData(ParamsKeyEnum.KEY_FILTER_MKIBEACON_ACC_MINOR_RANGE);
         return task;
     }
 
-    public static OrderTask getGPSCoarseTimeout() {
+    public static OrderTask getFilterMKIBeaconAccUUID() {
         ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_GPS_COARSE_TIMEOUT);
+        task.setData(ParamsKeyEnum.KEY_FILTER_MKIBEACON_ACC_UUID);
         return task;
     }
 
-    public static OrderTask getGPSFineTimeout() {
+    public static OrderTask getFilterEddystoneUidEnable() {
         ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_GPS_FINE_TIMEOUT);
+        task.setData(ParamsKeyEnum.KEY_FILTER_EDDYSTONE_UID_ENABLE);
         return task;
     }
 
-    public static OrderTask getGPSPDOPLimit() {
+    public static OrderTask getFilterEddystoneUidNamespace() {
         ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_GPS_PDOP_LIMIT);
+        task.setData(ParamsKeyEnum.KEY_FILTER_EDDYSTONE_UID_NAMESPACE);
         return task;
     }
 
-    public static OrderTask getGPSFixMode() {
+    public static OrderTask getFilterEddystoneUidInstance() {
         ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_GPS_FIX_MODE);
+        task.setData(ParamsKeyEnum.KEY_FILTER_EDDYSTONE_UID_INSTANCE);
         return task;
     }
 
-    public static OrderTask getGPSModel() {
+    public static OrderTask getFilterEddystoneUrlEnable() {
         ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_GPS_MODEL);
+        task.setData(ParamsKeyEnum.KEY_FILTER_EDDYSTONE_URL_ENABLE);
         return task;
     }
 
-    public static OrderTask getGPSTimeBudget() {
+    public static OrderTask getFilterEddystoneUrl() {
         ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_GPS_TIME_BUDGET);
+        task.setData(ParamsKeyEnum.KEY_FILTER_EDDYSTONE_URL);
         return task;
     }
 
-    public static OrderTask getGPSAutonomousAiding() {
+    public static OrderTask getFilterEddystoneTlmEnable() {
         ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_GPS_AUTONOMOUS_AIDING);
+        task.setData(ParamsKeyEnum.KEY_FILTER_EDDYSTONE_TLM_ENABLE);
         return task;
     }
 
-    public static OrderTask getGPSAidingAccuracy() {
+    public static OrderTask getFilterEddystoneTlmVersion() {
         ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_GPS_AIDING_ACCURACY);
+        task.setData(ParamsKeyEnum.KEY_FILTER_EDDYSTONE_TLM_VERSION);
         return task;
     }
 
-    public static OrderTask getGPSAidingTimeout() {
+    public static OrderTask getFilterBXPAcc() {
         ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_GPS_AIDING_TIMEOUT);
+        task.setData(ParamsKeyEnum.KEY_FILTER_BXP_ACC);
         return task;
     }
 
-    public static OrderTask getGPSExtremeMode() {
+    public static OrderTask getFilterBXPTH() {
         ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_GPS_EXTREME_MODE);
+        task.setData(ParamsKeyEnum.KEY_FILTER_BXP_TH);
         return task;
     }
+
+    public static OrderTask getFilterOtherEnable() {
+        ParamsReadTask task = new ParamsReadTask();
+        task.setData(ParamsKeyEnum.KEY_FILTER_OTHER_ENABLE);
+        return task;
+    }
+
+    public static OrderTask getFilterOtherRelationship() {
+        ParamsReadTask task = new ParamsReadTask();
+        task.setData(ParamsKeyEnum.KEY_FILTER_OTHER_RELATIONSHIP);
+        return task;
+    }
+
+    public static OrderTask getFilterOtherRules() {
+        ParamsReadTask task = new ParamsReadTask();
+        task.setData(ParamsKeyEnum.KEY_FILTER_OTHER_RULES);
+        return task;
+    }
+
 
     public static OrderTask getLoraRegion() {
         ParamsReadTask task = new ParamsReadTask();
@@ -492,141 +685,27 @@ public class OrderTaskAssembler {
         return task;
     }
 
-    public static OrderTask getLoraReconnectInterval() {
+    public static OrderTask getLoraNetworkCheckInterval() {
         ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_LORA_RECONNECT_INTERVAL);
+        task.setData(ParamsKeyEnum.KEY_LORA_NETWORK_CHECK_INTERVAL);
         return task;
     }
 
-    public static OrderTask getBeaconEnable() {
+    public static OrderTask getLoraMaxRetransmissionTimes() {
         ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_BEACON_ENABLE);
+        task.setData(ParamsKeyEnum.KEY_LORA_MAX_RETRANSMISSION_TIMES);
         return task;
     }
 
-    public static OrderTask getAdvInterval() {
+    public static OrderTask getLoraAdrAckLimit() {
         ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_ADV_INTERVAL);
+        task.setData(ParamsKeyEnum.KEY_LORA_ADR_ACK_LIMIT);
         return task;
     }
 
-    public static OrderTask getConnectable() {
+    public static OrderTask getLoraAdrAckDelay() {
         ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_CONNECTABLE);
-        return task;
-    }
-
-    public static OrderTask getAdvTimeout() {
-        ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_ADV_TIMEOUT);
-        return task;
-    }
-
-    public static OrderTask getAdvUUID() {
-        ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_ADV_UUID);
-        return task;
-    }
-
-    public static OrderTask getAdvMajor() {
-        ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_ADV_MAJOR);
-        return task;
-    }
-
-    public static OrderTask getAdvMinor() {
-        ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_ADV_MINOR);
-        return task;
-    }
-
-    public static OrderTask getAdvRSSI() {
-        ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_ADV_RSSI);
-        return task;
-    }
-
-    public static OrderTask getAdvTxPower() {
-        ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_ADV_TX_POWER);
-        return task;
-    }
-
-    public static OrderTask getAdvName() {
-        ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_ADV_NAME);
-        return task;
-    }
-
-    public static OrderTask getScanType() {
-        ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_SCAN_TYPE);
-        return task;
-    }
-
-    public static OrderTask getWakeupCondition() {
-        ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_WAKEUP_CONDITION);
-        return task;
-    }
-
-    public static OrderTask getMotionDetection() {
-        ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_MOTION_DETECTION);
-        return task;
-    }
-
-    public static OrderTask getVibrationEnable() {
-        ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_VIBRATION_ENABLE);
-        return task;
-    }
-
-    public static OrderTask getVibrationThreshold() {
-        ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_VIBRATION_THRESHOLD);
-        return task;
-    }
-
-    public static OrderTask getVibrationReportInterval() {
-        ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_VIBRATION_REPORT_INTERVAL);
-        return task;
-    }
-
-    public static OrderTask getVibrationTimeout() {
-        ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_VIBRATION_TIMEOUT);
-        return task;
-    }
-
-    public static OrderTask getManDownEnable() {
-        ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_MAN_DOWN_ENABLE);
-        return task;
-    }
-
-    public static OrderTask getManDownIdleTimeout() {
-        ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_MAN_DOWN_IDLE_TIMEOUT);
-        return task;
-    }
-
-    public static OrderTask getTamperAlarm() {
-        ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_TAMPER_ALARM);
-        return task;
-    }
-
-    public static OrderTask getActiveStateEnable() {
-        ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_ACTIVE_STATE_ENABLE);
-        return task;
-    }
-
-    public static OrderTask getActiveStateTimeout() {
-        ParamsReadTask task = new ParamsReadTask();
-        task.setData(ParamsKeyEnum.KEY_ACTIVE_STATE_TIMEOUT);
+        task.setData(ParamsKeyEnum.KEY_LORA_ADR_ACK_DELAY);
         return task;
     }
 
@@ -640,6 +719,12 @@ public class OrderTaskAssembler {
         return task;
     }
 
+    public static OrderTask close() {
+        ParamsWriteTask task = new ParamsWriteTask();
+        task.close();
+        return task;
+    }
+
     public static OrderTask restart() {
         ParamsWriteTask task = new ParamsWriteTask();
         task.restart();
@@ -648,19 +733,56 @@ public class OrderTaskAssembler {
 
     public static OrderTask restore() {
         ParamsWriteTask task = new ParamsWriteTask();
-        task.restore();
+        task.reset();
         return task;
     }
 
-    public static OrderTask setTime() {
+    public static OrderTask setBtnCloseEnable(@IntRange(from = 0, to = 1) int enable) {
         ParamsWriteTask task = new ParamsWriteTask();
-        task.setTime();
+        task.setBtnCloseEnable(enable);
         return task;
     }
 
-    public static OrderTask setTimeZone(int timeZone) {
+
+    public static OrderTask setLowPowerPercent(@IntRange(from = 10, to = 60) int percent) {
         ParamsWriteTask task = new ParamsWriteTask();
-        task.setTimeZone(timeZone);
+        task.setLowPowerPercent(percent);
+        return task;
+    }
+
+    public static OrderTask setLowPowerReportEnable(@IntRange(from = 0, to = 1) int enable) {
+        ParamsWriteTask task = new ParamsWriteTask();
+        task.setLowPowerReportEnable(enable);
+        return task;
+    }
+
+    public static OrderTask setAdvName(String advName) {
+        ParamsWriteTask task = new ParamsWriteTask();
+        task.setAdvName(advName);
+        return task;
+    }
+
+    public static OrderTask setAdvInterval(@IntRange(from = 1, to = 100) int advInterval) {
+        ParamsWriteTask task = new ParamsWriteTask();
+        task.setAdvInterval(advInterval);
+        return task;
+    }
+
+    public static OrderTask setAdvTxPower(int txPower) {
+        ParamsWriteTask task = new ParamsWriteTask();
+        task.setAdvTxPower(txPower);
+        return task;
+    }
+
+    public static OrderTask setAdvTimeout(@IntRange(from = 1, to = 60) int timeout) {
+        ParamsWriteTask task = new ParamsWriteTask();
+        task.setAdvTimeout(timeout);
+        return task;
+    }
+
+    public static OrderTask setPasswordVerifyEnable(@IntRange(from = 0, to = 1) int enable) {
+        ParamsWriteTask task = new ParamsWriteTask();
+        task.setPasswordVerifyEnable(enable);
         return task;
     }
 
@@ -670,75 +792,89 @@ public class OrderTaskAssembler {
         return task;
     }
 
-    public static OrderTask setWorkMode(@IntRange(from = 0, to = 4) int workMode) {
+
+    public static OrderTask setTimeZone(@IntRange(from = -24, to = 28) int timeZone) {
         ParamsWriteTask task = new ParamsWriteTask();
-        task.setWorkMode(workMode);
+        task.setTimeZone(timeZone);
         return task;
     }
 
-    public static OrderTask setPowerStatus(@IntRange(from = 0, to = 1) int status) {
+    public static OrderTask setTime() {
         ParamsWriteTask task = new ParamsWriteTask();
-        task.setPowerStatus(status);
+        task.setTime();
         return task;
     }
 
-    public static OrderTask setHeartBeatInterval(@IntRange(from = 300, to = 86400) int interval) {
+    public static OrderTask setAccWakeupThreshold(@IntRange(from = 1, to = 20) int threshold) {
+        ParamsWriteTask task = new ParamsWriteTask();
+        task.setAccWakeupThreshold(threshold);
+        return task;
+    }
+
+    public static OrderTask setAccWakeupDuration(@IntRange(from = 1, to = 10) int duration) {
+        ParamsWriteTask task = new ParamsWriteTask();
+        task.setAccWakeupDuration(duration);
+        return task;
+    }
+
+    public static OrderTask setAccMotionThreshold(@IntRange(from = 10, to = 250) int threshold) {
+        ParamsWriteTask task = new ParamsWriteTask();
+        task.setAccMotionThreshold(threshold);
+        return task;
+    }
+
+    public static OrderTask setAccMotionDuration(@IntRange(from = 1, to = 50) int duration) {
+        ParamsWriteTask task = new ParamsWriteTask();
+        task.setAccMotionDuration(duration);
+        return task;
+    }
+
+    public static OrderTask setAccMotionEndTimeout(@IntRange(from = 3, to = 180) int timeout) {
+        ParamsWriteTask task = new ParamsWriteTask();
+        task.setAccMotionEndTimeout(timeout);
+        return task;
+    }
+
+    public static OrderTask setShutdownPayloadEnable(@IntRange(from = 0, to = 1) int enable) {
+        ParamsWriteTask task = new ParamsWriteTask();
+        task.setShutdownPayloadEnable(enable);
+        return task;
+    }
+
+    public static OrderTask setDeviceMode(@IntRange(from = 0, to = 3) int mode) {
+        ParamsWriteTask task = new ParamsWriteTask();
+        task.setDeviceMode(mode);
+        return task;
+    }
+
+    public static OrderTask setHeartBeatInterval(@IntRange(from = 1, to = 14400) int interval) {
         ParamsWriteTask task = new ParamsWriteTask();
         task.setHeartBeatInterval(interval);
         return task;
     }
 
-    public static OrderTask setReedSwitch(@IntRange(from = 0, to = 1) int status) {
-        ParamsWriteTask task = new ParamsWriteTask();
-        task.setReedSwitch(status);
-        return task;
-    }
-
-    public static OrderTask setShutdownInfoReport(@IntRange(from = 0, to = 1) int onoff) {
-        ParamsWriteTask task = new ParamsWriteTask();
-        task.setShutdownInfoReport(onoff);
-        return task;
-    }
-
-    public static OrderTask setOfflineLocation(@IntRange(from = 0, to = 1) int onoff) {
-        ParamsWriteTask task = new ParamsWriteTask();
-        task.setOfflineLocation(onoff);
-        return task;
-    }
-
-    public static OrderTask setLowPower(@IntRange(from = 0, to = 4) int status) {
-        ParamsWriteTask task = new ParamsWriteTask();
-        task.setLowPower(status);
-        return task;
-    }
-
-    public static OrderTask setIndicatorLight(@IntRange(from = 0, to = 65535) int status) {
-        ParamsWriteTask task = new ParamsWriteTask();
-        task.setIndicatorLight(status);
-        return task;
-    }
-
-    public static OrderTask setPeriodicPosStrategy(@IntRange(from = 1, to = 7) int strategy) {
-        ParamsWriteTask task = new ParamsWriteTask();
-        task.setPeriodicPosStrategy(strategy);
-        return task;
-    }
-
-    public static OrderTask setPeriodicReportInterval(@IntRange(from = 30, to = 86400) int interval) {
+    public static OrderTask setPeriodicReportInterval(@IntRange(from = 1, to = 14400) int interval) {
         ParamsWriteTask task = new ParamsWriteTask();
         task.setPeriodicReportInterval(interval);
         return task;
     }
 
-    public static OrderTask setTimePosStrategy(@IntRange(from = 1, to = 7) int strategy) {
+    public static OrderTask setPeriodicPosStrategy(@IntRange(from = 0, to = 2) int strategy) {
         ParamsWriteTask task = new ParamsWriteTask();
-        task.setTimePosReportPoints(strategy);
+        task.setPeriodicPosStrategy(strategy);
         return task;
     }
+
 
     public static OrderTask setTimePosReportPoints(ArrayList<Integer> timePoints) {
         ParamsWriteTask task = new ParamsWriteTask();
         task.setTimePosReportPoints(timePoints);
+        return task;
+    }
+
+    public static OrderTask setTimePosStrategy(@IntRange(from = 0, to = 2) int strategy) {
+        ParamsWriteTask task = new ParamsWriteTask();
+        task.setTimePosReportPoints(strategy);
         return task;
     }
 
@@ -748,15 +884,22 @@ public class OrderTaskAssembler {
         return task;
     }
 
-    public static OrderTask setMotionModeStartNumber(int number) {
+    public static OrderTask setMotionStartPosStrategy(@IntRange(from = 0, to = 2) int strategy) {
+        ParamsWriteTask task = new ParamsWriteTask();
+        task.setMotionStartPosStrategy(strategy);
+        return task;
+    }
+
+    public static OrderTask setMotionModeStartNumber(@IntRange(from = 1, to = 255) int number) {
         ParamsWriteTask task = new ParamsWriteTask();
         task.setMotionModeStartNumber(number);
         return task;
     }
 
-    public static OrderTask setMotionStartPosStrategy(@IntRange(from = 1, to = 7) int strategy) {
+
+    public static OrderTask setMotionTripPosStrategy(@IntRange(from = 0, to = 2) int strategy) {
         ParamsWriteTask task = new ParamsWriteTask();
-        task.setMotionStartPosStrategy(strategy);
+        task.setMotionTripPosStrategy(strategy);
         return task;
     }
 
@@ -767,15 +910,9 @@ public class OrderTaskAssembler {
     }
 
 
-    public static OrderTask setMotionTripPosStrategy(@IntRange(from = 1, to = 7) int strategy) {
+    public static OrderTask setMotionEndPosStrategy(@IntRange(from = 0, to = 2) int strategy) {
         ParamsWriteTask task = new ParamsWriteTask();
-        task.setMotionTripPosStrategy(strategy);
-        return task;
-    }
-
-    public static OrderTask setMotionEndTimeout(@IntRange(from = 3, to = 180) int timeout) {
-        ParamsWriteTask task = new ParamsWriteTask();
-        task.setMotionEndTimeout(timeout);
+        task.setMotionEndPosStrategy(strategy);
         return task;
     }
 
@@ -785,33 +922,136 @@ public class OrderTaskAssembler {
         return task;
     }
 
+
     public static OrderTask setMotionEndInterval(@IntRange(from = 10, to = 300) int interval) {
         ParamsWriteTask task = new ParamsWriteTask();
         task.setMotionEndInterval(interval);
         return task;
     }
 
-    public static OrderTask setMotionEndPosStrategy(@IntRange(from = 1, to = 7) int strategy) {
-        ParamsWriteTask task = new ParamsWriteTask();
-        task.setMotionEndPosStrategy(strategy);
-        return task;
-    }
-
-    public static OrderTask setDownLinkPosStrategy(@IntRange(from = 1, to = 7) int strategy) {
+    public static OrderTask setDownLinkPosStrategy(@IntRange(from = 0, to = 2) int strategy) {
         ParamsWriteTask task = new ParamsWriteTask();
         task.setDownLinkPosStrategy(strategy);
         return task;
     }
 
-    public static OrderTask setWifiPosNumber(@IntRange(from = 1, to = 5) int number) {
+    public static OrderTask setManDownDetectionEnable(@IntRange(from = 0, to = 1) int enable) {
         ParamsWriteTask task = new ParamsWriteTask();
-        task.setWifiPosNumber(number);
+        task.setManDownDetectionEnable(enable);
         return task;
     }
 
-    public static OrderTask setWifiPosBSSIDNumber(@IntRange(from = 1, to = 5) int number) {
+    public static OrderTask setManDownPosStrategy(@IntRange(from = 0, to = 2) int strategy) {
         ParamsWriteTask task = new ParamsWriteTask();
-        task.setWifiPosBSSIDNumber(number);
+        task.setManDownPosStrategy(strategy);
+        return task;
+    }
+
+    public static OrderTask setManDownDetectionTimeout(@IntRange(from = 1, to = 120) int timeout) {
+        ParamsWriteTask task = new ParamsWriteTask();
+        task.setManDownDetectionTimeout(timeout);
+        return task;
+    }
+
+    public static OrderTask setManDownReportInterval(@IntRange(from = 10, to = 600) int interval) {
+        ParamsWriteTask task = new ParamsWriteTask();
+        task.setManDownReportInterval(interval);
+        return task;
+    }
+
+    public static OrderTask setManDownStartEventNotifyEnable(@IntRange(from = 0, to = 1) int enable) {
+        ParamsWriteTask task = new ParamsWriteTask();
+        task.setManDownStartEventNotifyEnable(enable);
+        return task;
+    }
+
+    public static OrderTask setManDownEndEventNotifyEnable(@IntRange(from = 0, to = 1) int enable) {
+        ParamsWriteTask task = new ParamsWriteTask();
+        task.setManDownEndEventNotifyEnable(enable);
+        return task;
+    }
+
+    public static OrderTask setVibrationIntensity(@IntRange(from = 0, to = 100) int intensity) {
+        ParamsWriteTask task = new ParamsWriteTask();
+        task.setVibrationIntensity(intensity);
+        return task;
+    }
+
+    public static OrderTask setAlarmType(@IntRange(from = 0, to = 2) int type) {
+        ParamsWriteTask task = new ParamsWriteTask();
+        task.setAlarmType(type);
+        return task;
+    }
+
+    public static OrderTask setAlarmExitPressDuration(@IntRange(from = 5, to = 15) int duration) {
+        ParamsWriteTask task = new ParamsWriteTask();
+        task.setAlarmExitPressDuration(duration);
+        return task;
+    }
+
+    public static OrderTask setAlarmSOSStartEventNotifyEnable(@IntRange(from = 0, to = 1) int enable) {
+        ParamsWriteTask task = new ParamsWriteTask();
+        task.setAlarmSOSStartEventNotifyEnable(enable);
+        return task;
+    }
+
+    public static OrderTask setAlarmSOSEndEventNotifyEnable(@IntRange(from = 0, to = 1) int enable) {
+        ParamsWriteTask task = new ParamsWriteTask();
+        task.setAlarmSOSEndEventNotifyEnable(enable);
+        return task;
+    }
+
+    public static OrderTask setAlarmSOSPosStrategy(@IntRange(from = 0, to = 2) int strategy) {
+        ParamsWriteTask task = new ParamsWriteTask();
+        task.setAlarmSOSPosStrategy(strategy);
+        return task;
+    }
+
+    public static OrderTask setAlarmSOSReportInterval(@IntRange(from = 10, to = 600) int interval) {
+        ParamsWriteTask task = new ParamsWriteTask();
+        task.setAlarmSOSReportInterval(interval);
+        return task;
+    }
+
+    public static OrderTask setAlarmSOSTriggerMode(@IntRange(from = 0, to = 6) int mode) {
+        ParamsWriteTask task = new ParamsWriteTask();
+        task.setAlarmSOSTriggerMode(mode);
+        return task;
+    }
+
+    public static OrderTask setAlarmAlertStartEventNotifyEnable(@IntRange(from = 0, to = 1) int enable) {
+        ParamsWriteTask task = new ParamsWriteTask();
+        task.setAlarmAlertStartEventNotifyEnable(enable);
+        return task;
+    }
+
+    public static OrderTask setAlarmAlertEndEventNotifyEnable(@IntRange(from = 0, to = 1) int enable) {
+        ParamsWriteTask task = new ParamsWriteTask();
+        task.setAlarmAlertEndEventNotifyEnable(enable);
+        return task;
+    }
+
+    public static OrderTask setAlarmAlertPosStrategy(@IntRange(from = 0, to = 2) int strategy) {
+        ParamsWriteTask task = new ParamsWriteTask();
+        task.setAlarmAlertPosStrategy(strategy);
+        return task;
+    }
+
+    public static OrderTask setAlarmAlertTriggerMode(@IntRange(from = 0, to = 6) int mode) {
+        ParamsWriteTask task = new ParamsWriteTask();
+        task.setAlarmAlertTriggerMode(mode);
+        return task;
+    }
+
+    public static OrderTask setGPSPosTimeout(@IntRange(from = 60, to = 600) int timeout) {
+        ParamsWriteTask task = new ParamsWriteTask();
+        task.setGPSPosTimeout(timeout);
+        return task;
+    }
+
+    public static OrderTask setGPSPDOPLimit(@IntRange(from = 25, to = 100) int limit) {
+        ParamsWriteTask task = new ParamsWriteTask();
+        task.setGPSPDOPLimit(limit);
         return task;
     }
 
@@ -827,198 +1067,222 @@ public class OrderTaskAssembler {
         return task;
     }
 
-    public static OrderTask setFilterABRelation(@IntRange(from = 0, to = 1) int relation) {
+    public static OrderTask setFilterRSSI(@IntRange(from = -127, to = 0) int rssi) {
         ParamsWriteTask task = new ParamsWriteTask();
-        task.setFilterABRelation(relation);
+        task.setFilterRSSI(rssi);
         return task;
     }
 
-    public static OrderTask setFilterSwitchA(@IntRange(from = 0, to = 1) int enable) {
+    public static OrderTask setFilterRelationship(@IntRange(from = 0, to = 6) int relationship) {
         ParamsWriteTask task = new ParamsWriteTask();
-        task.setFilterSwitchA(enable);
+        task.setFilterRelationship(relationship);
         return task;
     }
 
-    public static OrderTask setFilterNameA(String name, boolean isReverse) {
+    public static OrderTask setFilterMacPrecise(@IntRange(from = 0, to = 1) int enable) {
         ParamsWriteTask task = new ParamsWriteTask();
-        task.setFilterNameA(name, isReverse);
+        task.setFilterMacPrecise(enable);
         return task;
     }
 
-
-    public static OrderTask setFilterMacA(String mac, boolean isReverse) {
+    public static OrderTask setFilterMacReverse(@IntRange(from = 0, to = 1) int enable) {
         ParamsWriteTask task = new ParamsWriteTask();
-        task.setFilterMacA(mac, isReverse);
+        task.setFilterMacReverse(enable);
         return task;
     }
 
-    public static OrderTask setFilterMajorRangeA(@IntRange(from = 0, to = 1) int enable,
-                                                 @IntRange(from = 0, to = 65535) int majorMin,
-                                                 @IntRange(from = 0, to = 65535) int majorMax,
-                                                 boolean isReverse) {
+    public static OrderTask setFilterMacRules(ArrayList<String> filterMacRules) {
         ParamsWriteTask task = new ParamsWriteTask();
-        task.setFilterMajorRangeA(enable, majorMin, majorMax, isReverse);
+        task.setFilterMacRules(filterMacRules);
         return task;
     }
 
-    public static OrderTask setFilterMinorRangeA(@IntRange(from = 0, to = 1) int enable,
-                                                 @IntRange(from = 0, to = 65535) int minorMin,
-                                                 @IntRange(from = 0, to = 65535) int minorMax,
-                                                 boolean isReverse) {
+    public static OrderTask setFilterNamePrecise(@IntRange(from = 0, to = 1) int enable) {
         ParamsWriteTask task = new ParamsWriteTask();
-        task.setFilterMinorRangeA(enable, minorMin, minorMax, isReverse);
+        task.setFilterNamePrecise(enable);
         return task;
     }
 
-    public static OrderTask setFilterRawDataA(ArrayList<String> filterRawDatas, boolean isReverse) {
+    public static OrderTask setFilterNameReverse(@IntRange(from = 0, to = 1) int enable) {
         ParamsWriteTask task = new ParamsWriteTask();
-        task.setFilterRawDataA(filterRawDatas, isReverse);
+        task.setFilterNameReverse(enable);
         return task;
     }
 
-    public static OrderTask setFilterUUIDA(String uuid, boolean isReverse) {
+    public static OrderTask setFilterRawData(int unknown, int ibeacon,
+                                             int eddystone_uid, int eddystone_url, int eddystone_tlm,
+                                             int bxp_acc, int bxp_th,
+                                             int mkibeacon, int mkibeacon_acc) {
         ParamsWriteTask task = new ParamsWriteTask();
-        task.setFilterUUIDA(uuid, isReverse);
+        task.setFilterRawData(unknown, ibeacon,
+                eddystone_uid, eddystone_url, eddystone_tlm,
+                bxp_acc, bxp_th,
+                mkibeacon, mkibeacon_acc);
         return task;
     }
 
-    public static OrderTask setFilterRssiA(@IntRange(from = -127, to = 0) int rssi) {
+    public static OrderTask setFilterIBeaconEnable(@IntRange(from = 0, to = 1) int enable) {
         ParamsWriteTask task = new ParamsWriteTask();
-        task.setFilterRssiA(rssi);
+        task.setFilterIBeaconEnable(enable);
         return task;
     }
 
-    public static OrderTask setFilterSwitchB(@IntRange(from = 0, to = 1) int enable) {
+    public static OrderTask setFilterIBeaconMajorRange(@IntRange(from = 0, to = 1) int enable,
+                                                       @IntRange(from = 0, to = 65535) int min,
+                                                       @IntRange(from = 0, to = 65535) int max) {
         ParamsWriteTask task = new ParamsWriteTask();
-        task.setFilterSwitchB(enable);
+        task.setFilterIBeaconMajorRange(enable, min, max);
         return task;
     }
 
-    public static OrderTask setFilterNameB(String name, boolean isReverse) {
+    public static OrderTask setFilterIBeaconMinorRange(@IntRange(from = 0, to = 1) int enable,
+                                                       @IntRange(from = 0, to = 65535) int min,
+                                                       @IntRange(from = 0, to = 65535) int max) {
         ParamsWriteTask task = new ParamsWriteTask();
-        task.setFilterNameB(name, isReverse);
+        task.setFilterIBeaconMinorRange(enable, min, max);
         return task;
     }
 
-    public static OrderTask setFilterMacB(String mac, boolean isReverse) {
+    public static OrderTask setFilterIBeaconUUID(String uuid) {
         ParamsWriteTask task = new ParamsWriteTask();
-        task.setFilterMacB(mac, isReverse);
+        task.setFilterIBeaconUUID(uuid);
         return task;
     }
 
-    public static OrderTask setFilterMajorRangeB(@IntRange(from = 0, to = 1) int enable,
-                                                 @IntRange(from = 0, to = 65535) int majorMin,
-                                                 @IntRange(from = 0, to = 65535) int majorMax,
-                                                 boolean isReverse) {
+    public static OrderTask setFilterMKIBeaconEnable(@IntRange(from = 0, to = 1) int enable) {
         ParamsWriteTask task = new ParamsWriteTask();
-        task.setFilterMajorRangeB(enable, majorMin, majorMax, isReverse);
+        task.setFilterMKIBeaconEnable(enable);
         return task;
     }
 
-    public static OrderTask setFilterMinorRangeB(@IntRange(from = 0, to = 1) int enable,
-                                                 @IntRange(from = 0, to = 65535) int minorMin,
-                                                 @IntRange(from = 0, to = 65535) int minorMax,
-                                                 boolean isReverse) {
+    public static OrderTask setFilterMKIBeaconMajorRange(@IntRange(from = 0, to = 1) int enable,
+                                                         @IntRange(from = 0, to = 65535) int min,
+                                                         @IntRange(from = 0, to = 65535) int max) {
         ParamsWriteTask task = new ParamsWriteTask();
-        task.setFilterMinorRangeB(enable, minorMin, minorMax, isReverse);
+        task.setFilterMKIBeaconMajorRange(enable, min, max);
         return task;
     }
 
-    public static OrderTask setFilterRawDataB(ArrayList<String> filterRawDatas, boolean isReverse) {
+    public static OrderTask setFilterMKIBeaconMinorRange(@IntRange(from = 0, to = 1) int enable,
+                                                         @IntRange(from = 0, to = 65535) int min,
+                                                         @IntRange(from = 0, to = 65535) int max) {
         ParamsWriteTask task = new ParamsWriteTask();
-        task.setFilterRawDataB(filterRawDatas, isReverse);
+        task.setFilterMKIBeaconMinorRange(enable, min, max);
         return task;
     }
 
-    public static OrderTask setFilterUUIDB(String uuid, boolean isReverse) {
+    public static OrderTask setFilterMKIBeaconUUID(String uuid) {
         ParamsWriteTask task = new ParamsWriteTask();
-        task.setFilterUUIDB(uuid, isReverse);
+        task.setFilterMKIBeaconUUID(uuid);
         return task;
     }
 
-    public static OrderTask setFilterRssiB(@IntRange(from = -127, to = 0) int rssi) {
+    public static OrderTask setFilterMKIBeaconAccEnable(@IntRange(from = 0, to = 1) int enable) {
         ParamsWriteTask task = new ParamsWriteTask();
-        task.setFilterRssiB(rssi);
+        task.setFilterMKIBeaconAccEnable(enable);
         return task;
     }
 
-    public static OrderTask setGPSColdStartTimeout(@IntRange(from = 3, to = 15) int timeout) {
+    public static OrderTask setFilterMKIBeaconAccMajorRange(@IntRange(from = 0, to = 1) int enable,
+                                                            @IntRange(from = 0, to = 65535) int min,
+                                                            @IntRange(from = 0, to = 65535) int max) {
         ParamsWriteTask task = new ParamsWriteTask();
-        task.setGPSColdStartTimeout(timeout);
+        task.setFilterMKIBeaconAccMajorRange(enable, min, max);
         return task;
     }
 
-    public static OrderTask setGPSCoarseAccuracyMask(@IntRange(from = 5, to = 100) int mask) {
+    public static OrderTask setFilterMKIBeaconAccMinorRange(@IntRange(from = 0, to = 1) int enable,
+                                                            @IntRange(from = 0, to = 65535) int min,
+                                                            @IntRange(from = 0, to = 65535) int max) {
         ParamsWriteTask task = new ParamsWriteTask();
-        task.setGPSCoarseAccuracyMask(mask);
+        task.setFilterMKIBeaconAccMinorRange(enable, min, max);
         return task;
     }
 
-    public static OrderTask setGPSFineAccuracyMask(@IntRange(from = 5, to = 100) int mask) {
+    public static OrderTask setFilterMKIBeaconAccUUID(String uuid) {
         ParamsWriteTask task = new ParamsWriteTask();
-        task.setGPSFineAccuracyMask(mask);
+        task.setFilterMKIBeaconAccUUID(uuid);
         return task;
     }
 
-    public static OrderTask setGPSCoarseTimeout(@IntRange(from = 1, to = 7620) int timeout) {
+    public static OrderTask setFilterEddystoneUIDEnable(@IntRange(from = 0, to = 1) int enable) {
         ParamsWriteTask task = new ParamsWriteTask();
-        task.setGPSCoarseTimeout(timeout);
+        task.setFilterEddystoneUIDEnable(enable);
         return task;
     }
 
-    public static OrderTask setGPSFineTimeout(@IntRange(from = 0, to = 76200) int timeout) {
+    public static OrderTask setFilterEddystoneUIDNamespace(String namespace) {
         ParamsWriteTask task = new ParamsWriteTask();
-        task.setGPSFineTimeout(timeout);
+        task.setFilterEddystoneUIDNamespace(namespace);
         return task;
     }
 
-    public static OrderTask setGPSPDOPLimit(@IntRange(from = 25, to = 100) int limit) {
+    public static OrderTask setFilterEddystoneUIDInstance(String instance) {
         ParamsWriteTask task = new ParamsWriteTask();
-        task.setGPSPDOPlimit(limit);
+        task.setFilterEddystoneUIDInstance(instance);
         return task;
     }
 
-    public static OrderTask setGPSFixMode(@IntRange(from = 0, to = 2) int mode) {
+    public static OrderTask setFilterEddystoneUrlEnable(@IntRange(from = 0, to = 1) int enable) {
         ParamsWriteTask task = new ParamsWriteTask();
-        task.setGPSFixMode(mode);
+        task.setFilterEddystoneUrlEnable(enable);
         return task;
     }
 
-    public static OrderTask setGPSModel(@IntRange(from = 0, to = 9) int model) {
+    public static OrderTask setFilterEddystoneUrl(String url) {
         ParamsWriteTask task = new ParamsWriteTask();
-        task.setGPSModel(model);
+        task.setFilterEddystoneUrl(url);
         return task;
     }
 
-    public static OrderTask setGPSTimeBudget(@IntRange(from = 0, to = 76200) int budget) {
+    public static OrderTask setFilterEddystoneTlmEnable(@IntRange(from = 0, to = 1) int enable) {
         ParamsWriteTask task = new ParamsWriteTask();
-        task.setGPSTimeBudget(budget);
+        task.setFilterEddystoneTlmEnable(enable);
         return task;
     }
 
-    public static OrderTask setGPSAutonomousAiding(@IntRange(from = 0, to = 1) int enable) {
+    public static OrderTask setFilterEddystoneTlmVersion(@IntRange(from = 0, to = 2) int version) {
         ParamsWriteTask task = new ParamsWriteTask();
-        task.setGPSAutonomousAiding(enable);
+        task.setFilterEddystoneTlmVersion(version);
         return task;
     }
 
-    public static OrderTask setGPSAidingAccuracy(@IntRange(from = 5, to = 1000) int accuracy) {
+    public static OrderTask setFilterBXPAccEnable(@IntRange(from = 0, to = 1) int enable) {
         ParamsWriteTask task = new ParamsWriteTask();
-        task.setGPSAidingAccuracy(accuracy);
+        task.setFilterBXPAccEnable(enable);
         return task;
     }
 
-    public static OrderTask setGPSAidingTimeout(@IntRange(from = 1, to = 7620) int timeout) {
+    public static OrderTask setFilterBXPTHEnable(@IntRange(from = 0, to = 1) int enable) {
         ParamsWriteTask task = new ParamsWriteTask();
-        task.setGPSAidingTimeout(timeout);
+        task.setFilterBXPTHEnable(enable);
         return task;
     }
 
-    public static OrderTask setGPSExtremeMode(@IntRange(from = 0, to = 1) int mode) {
+    public static OrderTask setFilterOtherEnable(@IntRange(from = 0, to = 1) int enable) {
         ParamsWriteTask task = new ParamsWriteTask();
-        task.setGPSExtremeMode(mode);
+        task.setFilterOtherEnable(enable);
         return task;
     }
+
+    public static OrderTask setFilterOtherRelationship(@IntRange(from = 0, to = 5) int relationship) {
+        ParamsWriteTask task = new ParamsWriteTask();
+        task.setFilterOtherRelationship(relationship);
+        return task;
+    }
+
+    public static OrderTask setFilterOtherRules(ArrayList<String> filterOtherRules) {
+        ParamsWriteTask task = new ParamsWriteTask();
+        task.setFilterOtherRules(filterOtherRules);
+        return task;
+    }
+
+    public static OrderTask setFilterNameRules(ArrayList<String> filterOtherRules) {
+        ParamsWriteTask task = new ParamsWriteTask();
+        task.setFilterNameRules(filterOtherRules);
+        return task;
+    }
+
 
     public static OrderTask setLoraRegion(@IntRange(from = 0, to = 9) int region) {
         ParamsWriteTask task = new ParamsWriteTask();
@@ -1105,167 +1369,27 @@ public class OrderTaskAssembler {
         return task;
     }
 
-    public static OrderTask setLoraReconnectInterval(@IntRange(from = 0, to = 30) int days) {
+    public static OrderTask setLoraNetworkInterval(@IntRange(from = 0, to = 255) int interval) {
         ParamsWriteTask task = new ParamsWriteTask();
-        task.setLoraReconnectInterval(days);
+        task.setLoraNetworkInterval(interval);
         return task;
     }
 
-    public static OrderTask setBeaconEnable(@IntRange(from = 0, to = 1) int enable) {
+    public static OrderTask setLoraMaxRetransmissionTimes(@IntRange(from = 1, to = 8) int times) {
         ParamsWriteTask task = new ParamsWriteTask();
-        task.setBeaconEnable(enable);
+        task.setLoraMaxRetransmissionTimes(times);
         return task;
     }
 
-    public static OrderTask setAdvInterval(@IntRange(from = 0, to = 100) int advInterval) {
+    public static OrderTask setLoraAdrAckLimit(@IntRange(from = 1, to = 255) int limit) {
         ParamsWriteTask task = new ParamsWriteTask();
-        task.setAdvInterval(advInterval);
+        task.setLoraAdrAckLimit(limit);
         return task;
     }
 
-    public static OrderTask setConnectable(@IntRange(from = 0, to = 1) int connectable) {
+    public static OrderTask setLoraAdrAckDelay(@IntRange(from = 1, to = 255) int delay) {
         ParamsWriteTask task = new ParamsWriteTask();
-        task.setConnectable(connectable);
-        return task;
-    }
-
-    public static OrderTask setAdvTimeout(@IntRange(from = 1, to = 60) int timeout) {
-        ParamsWriteTask task = new ParamsWriteTask();
-        task.setAdvTimeout(timeout);
-        return task;
-    }
-
-    public static OrderTask setAdvUUID(String uuid) {
-        ParamsWriteTask task = new ParamsWriteTask();
-        task.setAdvUUID(uuid);
-        return task;
-    }
-
-    public static OrderTask setAdvMajor(@IntRange(from = 0, to = 65535) int major) {
-        ParamsWriteTask task = new ParamsWriteTask();
-        task.setAdvMajor(major);
-        return task;
-    }
-
-    public static OrderTask setAdvMinor(@IntRange(from = 0, to = 65535) int minor) {
-        ParamsWriteTask task = new ParamsWriteTask();
-        task.setAdvMinor(minor);
-        return task;
-    }
-
-    public static OrderTask setAdvRSSI(int rssi) {
-        ParamsWriteTask task = new ParamsWriteTask();
-        task.setAdvRSSI(rssi);
-        return task;
-    }
-
-    public static OrderTask setAdvTxPower(int txPower) {
-        ParamsWriteTask task = new ParamsWriteTask();
-        task.setAdvTxPower(txPower);
-        return task;
-    }
-
-    public static OrderTask setAdvName(String advName) {
-        ParamsWriteTask task = new ParamsWriteTask();
-        task.setAdvName(advName);
-        return task;
-    }
-
-    public static OrderTask setScanType(int scanType) {
-        ParamsWriteTask task = new ParamsWriteTask();
-        task.setScanType(scanType);
-        return task;
-    }
-
-    public static OrderTask setWakeupCondition(@IntRange(from = 1, to = 20) int threshold,
-                                               @IntRange(from = 1, to = 10) int time) {
-        ParamsWriteTask task = new ParamsWriteTask();
-        task.setWakeupCondition(threshold, time);
-        return task;
-    }
-
-    public static OrderTask setMotionDetection(@IntRange(from = 10, to = 250) int threshold,
-                                               @IntRange(from = 1, to = 50) int time) {
-        ParamsWriteTask task = new ParamsWriteTask();
-        task.setMotionDetection(threshold, time);
-        return task;
-    }
-
-    public static OrderTask setVibrationEnable(@IntRange(from = 0, to = 1) int enable) {
-        ParamsWriteTask task = new ParamsWriteTask();
-        task.setVibrationEnable(enable);
-        return task;
-    }
-
-    public static OrderTask setVibrationThreshold(@IntRange(from = 10, to = 255) int threshold) {
-        ParamsWriteTask task = new ParamsWriteTask();
-        task.setVibrationThreshold(threshold);
-        return task;
-    }
-
-    public static OrderTask setVibrationReportInterval(@IntRange(from = 3, to = 255) int interval) {
-        ParamsWriteTask task = new ParamsWriteTask();
-        task.setVibrationReportInterval(interval);
-        return task;
-    }
-
-    public static OrderTask setVibrationTimeout(@IntRange(from = 1, to = 20) int timeout) {
-        ParamsWriteTask task = new ParamsWriteTask();
-        task.setVibrationTimeout(timeout);
-        return task;
-    }
-
-    public static OrderTask setManDownEnable(@IntRange(from = 0, to = 1) int enable) {
-        ParamsWriteTask task = new ParamsWriteTask();
-        task.setManDownEnable(enable);
-        return task;
-    }
-
-    public static OrderTask setManDownIdleTimeout(@IntRange(from = 1, to = 8760) int timeout) {
-        ParamsWriteTask task = new ParamsWriteTask();
-        task.setManDownIdleTimeout(timeout);
-        return task;
-    }
-
-    public static OrderTask setTamperAlarm(@IntRange(from = 0, to = 1) int enable) {
-        ParamsWriteTask task = new ParamsWriteTask();
-        task.setTamperAlarm(enable);
-        return task;
-    }
-
-    public static OrderTask setActiveStateEnable(@IntRange(from = 0, to = 1) int enable) {
-        ParamsWriteTask task = new ParamsWriteTask();
-        task.setActiveStateEnable(enable);
-        return task;
-    }
-
-    public static OrderTask setActiveStateTimeout(@IntRange(from = 1, to = 86400) int interval) {
-        ParamsWriteTask task = new ParamsWriteTask();
-        task.setActiveStateTimeout(interval);
-        return task;
-    }
-
-    public static OrderTask setManDownIdleClear() {
-        ParamsWriteTask task = new ParamsWriteTask();
-        task.setManDownIdleClear();
-        return task;
-    }
-
-    public static OrderTask readStorageData(int time) {
-        ParamsWriteTask task = new ParamsWriteTask();
-        task.readStorageData(time);
-        return task;
-    }
-
-    public static OrderTask setSyncEnable(int enable) {
-        ParamsWriteTask task = new ParamsWriteTask();
-        task.setSyncEnable(enable);
-        return task;
-    }
-
-    public static OrderTask clearStorageData() {
-        ParamsWriteTask task = new ParamsWriteTask();
-        task.clearStorageData();
+        task.setLoraAdrAckDelay(delay);
         return task;
     }
 

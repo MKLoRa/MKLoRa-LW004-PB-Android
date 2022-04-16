@@ -32,7 +32,10 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -63,6 +66,7 @@ public class LogDataActivity extends BaseActivity implements BaseQuickAdapter.On
     private String syncTime;
     private Animation animation = null;
     private boolean isDisconnected;
+    private boolean isBack;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,6 +86,22 @@ public class LogDataActivity extends BaseActivity implements BaseQuickAdapter.On
         File file = new File(logDirPath);
         if (file.exists()) {
             File[] logFiles = file.listFiles();
+            Arrays.sort(logFiles, new Comparator<File>() {
+                public int compare(File f1, File f2) {
+                    long diff = f1.lastModified() - f2.lastModified();
+                    if (diff > 0)
+                        return 1;
+                    else if (diff == 0)
+                        return 0;
+                    else
+                        return -1;
+                }
+
+                public boolean equals(Object obj) {
+                    return true;
+                }
+
+            });
             for (int i = 0, l = logFiles.length; i < l; i++) {
                 File logFile = logFiles[i];
                 LogData data = new LogData();
@@ -146,6 +166,7 @@ public class LogDataActivity extends BaseActivity implements BaseQuickAdapter.On
             return;
         }
         if (animation == null) {
+            storeString = new StringBuilder();
             tvSyncSwitch.setText("Stop");
             isSync = true;
             animation = AnimationUtils.loadAnimation(this, R.anim.lw004_rotate_refresh);
@@ -258,6 +279,16 @@ public class LogDataActivity extends BaseActivity implements BaseQuickAdapter.On
             dialog.setMessage("No debug logs are sent during this process！");
             dialog.setConfirm("OK");
             dialog.setCancelGone();
+            dialog.setOnAlertConfirmListener(() -> {
+                if (isDisconnected) {
+                    Intent intent = new Intent(this, LoRaLW004MainActivity.class);
+                    intent.putExtra(AppConstants.EXTRA_KEY_FROM_ACTIVITY, TAG);
+                    startActivity(intent);
+                    return;
+                }
+                if (isBack)
+                    finish();
+            });
             dialog.show(getSupportFragmentManager());
             return;
         }
@@ -271,10 +302,13 @@ public class LogDataActivity extends BaseActivity implements BaseQuickAdapter.On
         LogData.filePath = logFilePath;
         LogDatas.add(LogData);
         adapter.replaceData(LogDatas);
+        if (isBack)
+            finish();
     }
 
     @Override
     public void onBackPressed() {
+        isBack = true;
         backHome();
     }
 
@@ -302,6 +336,7 @@ public class LogDataActivity extends BaseActivity implements BaseQuickAdapter.On
     public void onBack(View view) {
         if (isWindowLocked())
             return;
+        isBack = true;
         backHome();
     }
 }

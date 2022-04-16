@@ -22,9 +22,6 @@ import butterknife.ButterKnife;
 
 public class PositionFragment extends Fragment {
     private static final String TAG = PositionFragment.class.getSimpleName();
-    @BindView(R2.id.iv_offline_fix)
-    ImageView ivOfflineFix;
-    private boolean mOfflineFixEnable;
 
     private DeviceInfoActivity activity;
 
@@ -45,19 +42,5 @@ public class PositionFragment extends Fragment {
         ButterKnife.bind(this, view);
         activity = (DeviceInfoActivity) getActivity();
         return view;
-    }
-
-    public void setOfflineFix(int enable) {
-        mOfflineFixEnable = enable == 1;
-        ivOfflineFix.setImageResource(mOfflineFixEnable ? R.drawable.lw004_ic_checked : R.drawable.lw004_ic_unchecked);
-    }
-
-    public void changeOfflineFix() {
-        mOfflineFixEnable = !mOfflineFixEnable;
-        activity.showSyncingProgressDialog();
-        ArrayList<OrderTask> orderTasks = new ArrayList<>();
-        orderTasks.add(OrderTaskAssembler.setOfflineLocation(mOfflineFixEnable ? 1 : 0));
-        orderTasks.add(OrderTaskAssembler.getOfflineLocation());
-        LoRaLW004MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
     }
 }

@@ -496,7 +496,7 @@
                             android:layout_height="wrap_content"
                             android:paddingTop="6dp"
                             android:paddingBottom="6dp"
-                            android:text="*It is only used for EU868,CN779,EU433 and RU864. Off: The uplink report interval will not be limit by region freqency. On:The uplink report interval will be limit by region freqency."
+                            android:text="*It is only used for EU868,CN779,EU433 and RU864.\nOff: The uplink report interval will not be limit by region freqency.\nOn:The uplink report interval will be limit by region freqency."
                             android:textColor="@color/lw004_black_333333"
                             android:textSize="15sp" />
 
@@ -673,6 +673,103 @@
                         </RelativeLayout>
                     </LinearLayout>
                 </LinearLayout>
+
+                <RelativeLayout
+                    android:id="@+id/rl_max_retransmission_times"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:background="@color/lw004_white_ffffff"
+                    android:orientation="horizontal"
+                    android:padding="10dp"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:paddingTop="6dp"
+                        android:paddingBottom="6dp"
+                        android:text="Max retransmission times"
+                        android:textColor="@color/lw004_black_333333"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv_max_retransmission_times"
+                        android:layout_width="90dp"
+                        android:layout_height="40dp"
+                        android:layout_alignParentRight="true"
+                        android:background="@drawable/lw004_shape_radius_blue_btn_bg"
+                        android:clickable="true"
+                        android:gravity="center"
+                        android:onClick="selectMaxRetransmissionTimes"
+                        android:text=""
+                        android:textColor="@color/lw004_white_ffffff"
+                        android:textSize="15sp" />
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:background="@color/lw004_white_ffffff"
+                    android:orientation="horizontal"
+                    android:padding="10dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_alignBaseline="@id/et_adr_ack_limit"
+                        android:paddingTop="6dp"
+                        android:paddingBottom="6dp"
+                        android:text="ADR_ACK_LIMIT"
+                        android:textColor="@color/lw004_black_333333"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <EditText
+                        android:id="@+id/et_adr_ack_limit"
+                        android:layout_width="90dp"
+                        android:layout_height="40dp"
+                        android:layout_alignParentRight="true"
+                        android:gravity="center"
+                        android:hint="1-100"
+                        android:inputType="number"
+                        android:text=""
+                        android:textColor="@color/lw004_black_333333"
+                        android:textSize="15sp" />
+
+                    <View
+                        style="@style/lw004_divider_line"
+                        android:layout_below="@id/et_adr_ack_limit"
+                        android:layout_marginTop="10dp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_alignBaseline="@id/et_adr_ack_delay"
+                        android:paddingTop="6dp"
+                        android:paddingBottom="6dp"
+                        android:text="ADR_ACK_DELAY"
+                        android:textColor="@color/lw004_black_333333"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <EditText
+                        android:id="@+id/et_adr_ack_delay"
+                        android:layout_width="90dp"
+                        android:layout_height="40dp"
+                        android:layout_below="@id/et_adr_ack_limit"
+                        android:layout_alignParentRight="true"
+                        android:layout_marginTop="20dp"
+                        android:gravity="center"
+                        android:hint="1-100"
+                        android:inputType="number"
+                        android:text=""
+                        android:textColor="@color/lw004_black_333333"
+                        android:textSize="15sp" />
+                </RelativeLayout>
             </LinearLayout>
         </LinearLayout>
     </ScrollView>

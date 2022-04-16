@@ -1,11 +1,6 @@
 package com.moko.lw004.activity;
 
 
-import android.bluetooth.BluetoothAdapter;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
@@ -17,6 +12,7 @@ import com.moko.ble.lib.event.ConnectStatusEvent;
 import com.moko.ble.lib.event.OrderTaskResponseEvent;
 import com.moko.ble.lib.task.OrderTask;
 import com.moko.ble.lib.task.OrderTaskResponse;
+import com.moko.ble.lib.utils.MokoUtils;
 import com.moko.lw004.R;
 import com.moko.lw004.R2;
 import com.moko.lw004.dialog.AlertMessageDialog;
@@ -32,42 +28,40 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class VibrationDetectionActivity extends BaseActivity {
+public class FilterUIDActivity extends BaseActivity {
 
-    @BindView(R2.id.cb_vibration_detection)
-    CheckBox cbVibrationDetection;
-    @BindView(R2.id.et_vibration_report_interval)
-    EditText etVibrationReportInterval;
-    @BindView(R2.id.et_vibration_timeout)
-    EditText etVibrationTimeout;
-    private boolean mReceiverTag = false;
+
+    @BindView(R2.id.cb_uid)
+    CheckBox cbUid;
+    @BindView(R2.id.et_uid_namespace)
+    EditText etUidNamespace;
+    @BindView(R2.id.et_uid_instance_id)
+    EditText etUidInstanceId;
     private boolean savedParamsError;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.lw004_activity_vibration_detection);
+        setContentView(R.layout.lw004_activity_filter_uid);
         ButterKnife.bind(this);
         EventBus.getDefault().register(this);
-        // 注册广播接收器
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
-        registerReceiver(mReceiver, filter);
-        mReceiverTag = true;
+
         showSyncingProgressDialog();
         List<OrderTask> orderTasks = new ArrayList<>();
-        orderTasks.add(OrderTaskAssembler.getVibrationEnable());
-        orderTasks.add(OrderTaskAssembler.getVibrationReportInterval());
-        orderTasks.add(OrderTaskAssembler.getVibrationTimeout());
+        orderTasks.add(OrderTaskAssembler.getFilterEddystoneUidEnable());
+        orderTasks.add(OrderTaskAssembler.getFilterEddystoneUidNamespace());
+        orderTasks.add(OrderTaskAssembler.getFilterEddystoneUidInstance());
         LoRaLW004MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
     }
 
-    @Subscribe(threadMode = ThreadMode.POSTING, priority = 300)
+
+    @Subscribe(threadMode = ThreadMode.POSTING, priority = 400)
     public void onConnectStatusEvent(ConnectStatusEvent event) {
         final String action = event.getAction();
         runOnUiThread(() -> {
@@ -77,7 +71,7 @@ public class VibrationDetectionActivity extends BaseActivity {
         });
     }
 
-    @Subscribe(threadMode = ThreadMode.POSTING, priority = 300)
+    @Subscribe(threadMode = ThreadMode.POSTING, priority = 400)
     public void onOrderTaskResponseEvent(OrderTaskResponseEvent event) {
         final String action = event.getAction();
         if (!MokoConstants.ACTION_CURRENT_DATA.equals(action))
@@ -110,18 +104,18 @@ public class VibrationDetectionActivity extends BaseActivity {
                                 // write
                                 int result = value[4] & 0xFF;
                                 switch (configKeyEnum) {
-                                    case KEY_VIBRATION_ENABLE:
-                                    case KEY_VIBRATION_REPORT_INTERVAL:
+                                    case KEY_FILTER_EDDYSTONE_UID_NAMESPACE:
+                                    case KEY_FILTER_EDDYSTONE_UID_INSTANCE:
                                         if (result != 1) {
                                             savedParamsError = true;
                                         }
                                         break;
-                                    case KEY_VIBRATION_TIMEOUT:
+                                    case KEY_FILTER_EDDYSTONE_UID_ENABLE:
                                         if (result != 1) {
                                             savedParamsError = true;
                                         }
                                         if (savedParamsError) {
-                                            ToastUtils.showToast(VibrationDetectionActivity.this, "Opps！Save failed. Please check the input characters and try again.");
+                                            ToastUtils.showToast(FilterUIDActivity.this, "Opps！Save failed. Please check the input characters and try again.");
                                         } else {
                                             AlertMessageDialog dialog = new AlertMessageDialog();
                                             dialog.setMessage("Saved Successfully！");
@@ -135,22 +129,22 @@ public class VibrationDetectionActivity extends BaseActivity {
                             if (flag == 0x00) {
                                 // read
                                 switch (configKeyEnum) {
-                                    case KEY_VIBRATION_ENABLE:
+                                    case KEY_FILTER_EDDYSTONE_UID_NAMESPACE:
+                                        if (length > 0) {
+                                            String uuid = MokoUtils.bytesToHexString(Arrays.copyOfRange(value, 4, 4 + length));
+                                            etUidNamespace.setText(String.valueOf(uuid));
+                                        }
+                                        break;
+                                    case KEY_FILTER_EDDYSTONE_UID_INSTANCE:
+                                        if (length > 0) {
+                                            String uuid = MokoUtils.bytesToHexString(Arrays.copyOfRange(value, 4, 4 + length));
+                                            etUidInstanceId.setText(String.valueOf(uuid));
+                                        }
+                                        break;
+                                    case KEY_FILTER_EDDYSTONE_UID_ENABLE:
                                         if (length > 0) {
                                             int enable = value[4] & 0xFF;
-                                            cbVibrationDetection.setChecked(enable == 1);
-                                        }
-                                        break;
-                                    case KEY_VIBRATION_REPORT_INTERVAL:
-                                        if (length > 0) {
-                                            int interval = value[4] & 0xFF;
-                                            etVibrationReportInterval.setText(String.valueOf(interval));
-                                        }
-                                        break;
-                                    case KEY_VIBRATION_TIMEOUT:
-                                        if (length > 0) {
-                                            int timeout = value[4] & 0xFF;
-                                            etVibrationTimeout.setText(String.valueOf(timeout));
+                                            cbUid.setChecked(enable == 1);
                                         }
                                         break;
                                 }
@@ -162,35 +156,51 @@ public class VibrationDetectionActivity extends BaseActivity {
         });
     }
 
+    public void onSave(View view) {
+        if (isWindowLocked())
+            return;
+        if (isValid()) {
+            showSyncingProgressDialog();
+            saveParams();
+        } else {
+            ToastUtils.showToast(this, "Para error!");
+        }
+    }
 
-    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-
-            if (intent != null) {
-                String action = intent.getAction();
-                if (BluetoothAdapter.ACTION_STATE_CHANGED.equals(action)) {
-                    int blueState = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, 0);
-                    switch (blueState) {
-                        case BluetoothAdapter.STATE_TURNING_OFF:
-                            dismissSyncProgressDialog();
-                            finish();
-                            break;
-                    }
-                }
+    private boolean isValid() {
+        final String namespace = etUidNamespace.getText().toString();
+        final String instanceId = etUidInstanceId.getText().toString();
+        if (!TextUtils.isEmpty(namespace)) {
+            int length = namespace.length();
+            if (length % 2 != 0) {
+                return false;
             }
         }
-    };
+        if (!TextUtils.isEmpty(instanceId)) {
+            int length = instanceId.length();
+            if (length % 2 != 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+
+    private void saveParams() {
+        final String namespace = etUidNamespace.getText().toString();
+        final String instanceId = etUidInstanceId.getText().toString();
+        savedParamsError = false;
+        List<OrderTask> orderTasks = new ArrayList<>();
+        orderTasks.add(OrderTaskAssembler.setFilterEddystoneUIDNamespace(namespace));
+        orderTasks.add(OrderTaskAssembler.setFilterEddystoneUIDInstance(instanceId));
+        orderTasks.add(OrderTaskAssembler.setFilterEddystoneUIDEnable(cbUid.isChecked() ? 1 : 0));
+        LoRaLW004MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
+    }
+
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (mReceiverTag) {
-            mReceiverTag = false;
-            // 注销广播
-            unregisterReceiver(mReceiver);
-        }
         EventBus.getDefault().unregister(this);
     }
 
@@ -221,46 +231,5 @@ public class VibrationDetectionActivity extends BaseActivity {
     private void backHome() {
         setResult(RESULT_OK);
         finish();
-    }
-
-    public void onSave(View view) {
-        if (isWindowLocked())
-            return;
-        if (isValid()) {
-            showSyncingProgressDialog();
-            saveParams();
-        } else {
-            ToastUtils.showToast(this, "Opps！Save failed. Please check the input characters and try again.");
-        }
-    }
-
-    private boolean isValid() {
-        final String intervalStr = etVibrationReportInterval.getText().toString();
-        if (TextUtils.isEmpty(intervalStr))
-            return false;
-        final int interval = Integer.parseInt(intervalStr);
-        if (interval < 3 || interval > 255)
-            return false;
-        final String timeoutStr = etVibrationTimeout.getText().toString();
-        if (TextUtils.isEmpty(timeoutStr))
-            return false;
-        final int timeout = Integer.parseInt(timeoutStr);
-        if (timeout < 1 || timeout > 20)
-            return false;
-        return true;
-
-    }
-
-    private void saveParams() {
-        final String intervalStr = etVibrationReportInterval.getText().toString();
-        final int interval = Integer.parseInt(intervalStr);
-        final String timeoutStr = etVibrationTimeout.getText().toString();
-        final int timeout = Integer.parseInt(timeoutStr);
-        savedParamsError = false;
-        List<OrderTask> orderTasks = new ArrayList<>();
-        orderTasks.add(OrderTaskAssembler.setVibrationEnable(cbVibrationDetection.isChecked() ? 1 : 0));
-        orderTasks.add(OrderTaskAssembler.setVibrationReportInterval(interval));
-        orderTasks.add(OrderTaskAssembler.setVibrationTimeout(timeout));
-        LoRaLW004MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
     }
 }

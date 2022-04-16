@@ -6,13 +6,10 @@ public class AdvInfo {
     public int rssi;
     public String mac;
     public int battery;
-    public int powerState;
     public long scanTime;
     public long intervalTime;
     public int txPower;
-    public String uuid;
-    public int major;
-    public int minor;
-    public int measurePower;
+    public boolean verifyEnable;
+    public int voltage;
     public boolean connectable;
 }

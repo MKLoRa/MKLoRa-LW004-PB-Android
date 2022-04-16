@@ -42,7 +42,6 @@ public class DeviceModeActivity extends BaseActivity {
     private boolean savedParamsError;
     private ArrayList<String> mValues;
     private int mSelected;
-    private int mShowSelected;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,7 +60,7 @@ public class DeviceModeActivity extends BaseActivity {
         registerReceiver(mReceiver, filter);
         mReceiverTag = true;
         showSyncingProgressDialog();
-        LoRaLW004MokoSupport.getInstance().sendOrder(OrderTaskAssembler.getWorkMode());
+        LoRaLW004MokoSupport.getInstance().sendOrder(OrderTaskAssembler.getDeviceMode());
     }
 
     @Subscribe(threadMode = ThreadMode.POSTING, priority = 200)
@@ -107,7 +106,7 @@ public class DeviceModeActivity extends BaseActivity {
                                 // write
                                 int result = value[4] & 0xFF;
                                 switch (configKeyEnum) {
-                                    case KEY_WORK_MODE:
+                                    case KEY_DEVICE_MODE:
                                         if (result != 1) {
                                             savedParamsError = true;
                                         }
@@ -126,20 +125,11 @@ public class DeviceModeActivity extends BaseActivity {
                             if (flag == 0x00) {
                                 // read
                                 switch (configKeyEnum) {
-                                    case KEY_WORK_MODE:
+                                    case KEY_DEVICE_MODE:
                                         if (length > 0) {
                                             int mode = value[4] & 0xFF;
                                             mSelected = mode;
-                                            if (mode == 1) {
-                                                mShowSelected = 0;
-                                            } else if (mode == 2) {
-                                                mShowSelected = 2;
-                                            } else if (mode == 3) {
-                                                mShowSelected = 1;
-                                            } else if (mode == 4) {
-                                                mShowSelected = 3;
-                                            }
-                                            tvDeviceMode.setText(mValues.get(mShowSelected));
+                                            tvDeviceMode.setText(mValues.get(mSelected));
                                         }
                                         break;
                                 }
@@ -216,22 +206,13 @@ public class DeviceModeActivity extends BaseActivity {
         if (isWindowLocked())
             return;
         BottomDialog dialog = new BottomDialog();
-        dialog.setDatas(mValues, mShowSelected);
+        dialog.setDatas(mValues, mSelected);
         dialog.setListener(value -> {
-            mShowSelected = value;
-            if (value == 0) {
-                mSelected = 1;
-            } else if (value == 1) {
-                mSelected = 3;
-            } else if (value == 2) {
-                mSelected = 2;
-            } else if (value == 3) {
-                mSelected = 4;
-            }
+            mSelected = value;
             tvDeviceMode.setText(mValues.get(value));
             savedParamsError = false;
             showSyncingProgressDialog();
-            LoRaLW004MokoSupport.getInstance().sendOrder(OrderTaskAssembler.setWorkMode(mSelected));
+            LoRaLW004MokoSupport.getInstance().sendOrder(OrderTaskAssembler.setDeviceMode(mSelected));
         });
         dialog.show(getSupportFragmentManager());
     }

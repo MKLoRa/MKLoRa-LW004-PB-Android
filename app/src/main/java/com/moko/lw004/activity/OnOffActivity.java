@@ -1,15 +1,9 @@
 package com.moko.lw004.activity;
 
 
-import android.bluetooth.BluetoothAdapter;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.moko.ble.lib.MokoConstants;
 import com.moko.ble.lib.event.ConnectStatusEvent;
@@ -19,7 +13,6 @@ import com.moko.ble.lib.task.OrderTaskResponse;
 import com.moko.lw004.R;
 import com.moko.lw004.R2;
 import com.moko.lw004.dialog.AlertMessageDialog;
-import com.moko.lw004.dialog.BottomDialog;
 import com.moko.lw004.dialog.LoadingMessageDialog;
 import com.moko.lw004.utils.ToastUtils;
 import com.moko.support.lw004.LoRaLW004MokoSupport;
@@ -39,34 +32,28 @@ import butterknife.ButterKnife;
 
 public class OnOffActivity extends BaseActivity {
 
-    @BindView(R2.id.iv_magnet)
-    ImageView ivMagnet;
-    @BindView(R2.id.tv_default_mode)
-    TextView tvDefaultMode;
-    private boolean mReceiverTag = false;
+
+    @BindView(R2.id.iv_shutdown_payload)
+    ImageView ivShutdownPayload;
+    @BindView(R2.id.iv_off_by_button)
+    ImageView ivOffByButton;
+    @BindView(R2.id.iv_power_off)
+    ImageView ivPowerOff;
     private boolean savedParamsError;
-    private ArrayList<String> mValues;
-    private int mSelected;
-    private boolean mMagnetEnable;
+    private boolean mShutdownPayloadEnable;
+    private boolean mOFFByButtonEnable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.lw004_activity_on_off_settings);
         ButterKnife.bind(this);
-        mValues = new ArrayList<>();
-        mValues.add("OFF");
-        mValues.add("Revert to last mode");
+
         EventBus.getDefault().register(this);
-        // 注册广播接收器
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
-        registerReceiver(mReceiver, filter);
-        mReceiverTag = true;
         showSyncingProgressDialog();
         List<OrderTask> orderTasks = new ArrayList<>();
-        orderTasks.add(OrderTaskAssembler.getReedSwitch());
-        orderTasks.add(OrderTaskAssembler.getPowerStatus());
+        orderTasks.add(OrderTaskAssembler.getShutdownPayloadEnable());
+        orderTasks.add(OrderTaskAssembler.getBtnCloseEnable());
         LoRaLW004MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
     }
 
@@ -113,12 +100,8 @@ public class OnOffActivity extends BaseActivity {
                                 // write
                                 int result = value[4] & 0xFF;
                                 switch (configKeyEnum) {
-                                    case KEY_REED_SWITCH:
-                                        if (result != 1) {
-                                            savedParamsError = true;
-                                        }
-                                        break;
-                                    case KEY_POWER_STATUS:
+                                    case KEY_BUTTON_CLOSE_ENABLE:
+                                    case KEY_SHUTDOWN_PAYLOAD_ENABLE:
                                         if (result != 1) {
                                             savedParamsError = true;
                                         }
@@ -137,18 +120,18 @@ public class OnOffActivity extends BaseActivity {
                             if (flag == 0x00) {
                                 // read
                                 switch (configKeyEnum) {
-                                    case KEY_REED_SWITCH:
+                                    case KEY_BUTTON_CLOSE_ENABLE:
                                         if (length > 0) {
                                             int enable = value[4] & 0xFF;
-                                            mMagnetEnable = enable == 1;
-                                            ivMagnet.setImageResource(mMagnetEnable ? R.drawable.lw004_ic_checked : R.drawable.lw004_ic_unchecked);
+                                            mOFFByButtonEnable = enable == 1;
+                                            ivOffByButton.setImageResource(mOFFByButtonEnable ? R.drawable.lw004_ic_checked : R.drawable.lw004_ic_unchecked);
                                         }
                                         break;
-                                    case KEY_POWER_STATUS:
+                                    case KEY_SHUTDOWN_PAYLOAD_ENABLE:
                                         if (length > 0) {
-                                            int status = value[4] & 0xFF;
-                                            mSelected = status;
-                                            tvDefaultMode.setText(mValues.get(status));
+                                            int enable = value[4] & 0xFF;
+                                            mShutdownPayloadEnable = enable == 1;
+                                            ivShutdownPayload.setImageResource(mShutdownPayloadEnable ? R.drawable.lw004_ic_checked : R.drawable.lw004_ic_unchecked);
                                         }
                                         break;
                                 }
@@ -160,35 +143,9 @@ public class OnOffActivity extends BaseActivity {
         });
     }
 
-
-    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-
-            if (intent != null) {
-                String action = intent.getAction();
-                if (BluetoothAdapter.ACTION_STATE_CHANGED.equals(action)) {
-                    int blueState = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, 0);
-                    switch (blueState) {
-                        case BluetoothAdapter.STATE_TURNING_OFF:
-                            dismissSyncProgressDialog();
-                            finish();
-                            break;
-                    }
-                }
-            }
-        }
-    };
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (mReceiverTag) {
-            mReceiverTag = false;
-            // 注销广播
-            unregisterReceiver(mReceiver);
-        }
         EventBus.getDefault().unregister(this);
     }
 
@@ -221,30 +178,42 @@ public class OnOffActivity extends BaseActivity {
         finish();
     }
 
-    public void selectDefaultMode(View view) {
-        if (isWindowLocked())
-            return;
-        BottomDialog dialog = new BottomDialog();
-        dialog.setDatas(mValues, mSelected);
-        dialog.setListener(value -> {
-            mSelected = value;
-            tvDefaultMode.setText(mValues.get(value));
-            savedParamsError = false;
-            showSyncingProgressDialog();
-            LoRaLW004MokoSupport.getInstance().sendOrder(OrderTaskAssembler.setPowerStatus(value));
-        });
-        dialog.show(getSupportFragmentManager());
-    }
 
-    public void onMagnet(View view) {
+    public void onShutdownPayload(View view) {
         if (isWindowLocked())
             return;
-        mMagnetEnable = !mMagnetEnable;
+        mShutdownPayloadEnable = !mShutdownPayloadEnable;
         savedParamsError = false;
         showSyncingProgressDialog();
         ArrayList<OrderTask> orderTasks = new ArrayList<>();
-        orderTasks.add(OrderTaskAssembler.setReedSwitch(mMagnetEnable ? 1 : 0));
-        orderTasks.add(OrderTaskAssembler.getReedSwitch());
+        orderTasks.add(OrderTaskAssembler.setShutdownPayloadEnable(mShutdownPayloadEnable ? 1 : 0));
+        orderTasks.add(OrderTaskAssembler.getShutdownPayloadEnable());
         LoRaLW004MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
+    }
+
+    public void onOFFByButton(View view) {
+        if (isWindowLocked())
+            return;
+        mOFFByButtonEnable = !mOFFByButtonEnable;
+        savedParamsError = false;
+        showSyncingProgressDialog();
+        ArrayList<OrderTask> orderTasks = new ArrayList<>();
+        orderTasks.add(OrderTaskAssembler.setBtnCloseEnable(mOFFByButtonEnable ? 1 : 0));
+        orderTasks.add(OrderTaskAssembler.getBtnCloseEnable());
+        LoRaLW004MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
+    }
+
+    public void onPowerOff(View view) {
+        if (isWindowLocked())
+            return;
+        AlertMessageDialog dialog = new AlertMessageDialog();
+        dialog.setTitle("Warning!");
+        dialog.setMessage("Are you sure to turn off the device? Please make sure the device has a button to turn on!");
+        dialog.setConfirm("OK");
+        dialog.setOnAlertConfirmListener(() -> {
+            showSyncingProgressDialog();
+            LoRaLW004MokoSupport.getInstance().sendOrder(OrderTaskAssembler.close());
+        });
+        dialog.show(getSupportFragmentManager());
     }
 }

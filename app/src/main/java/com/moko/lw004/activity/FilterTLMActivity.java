@@ -1,24 +1,20 @@
 package com.moko.lw004.activity;
 
 
-import android.bluetooth.BluetoothAdapter;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.CheckBox;
+import android.widget.TextView;
 
 import com.moko.ble.lib.MokoConstants;
 import com.moko.ble.lib.event.ConnectStatusEvent;
 import com.moko.ble.lib.event.OrderTaskResponseEvent;
 import com.moko.ble.lib.task.OrderTask;
 import com.moko.ble.lib.task.OrderTaskResponse;
-import com.moko.ble.lib.utils.MokoUtils;
 import com.moko.lw004.R;
 import com.moko.lw004.R2;
 import com.moko.lw004.dialog.AlertMessageDialog;
+import com.moko.lw004.dialog.BottomDialog;
 import com.moko.lw004.dialog.LoadingMessageDialog;
 import com.moko.lw004.utils.ToastUtils;
 import com.moko.support.lw004.LoRaLW004MokoSupport;
@@ -31,58 +27,42 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class IndicatorSettingsActivity extends BaseActivity {
+public class FilterTLMActivity extends BaseActivity {
 
-    @BindView(R2.id.cb_tamper)
-    CheckBox cbTamper;
-    @BindView(R2.id.cb_low_power)
-    CheckBox cbLowPower;
-    @BindView(R2.id.cb_wifi_fix)
-    CheckBox cbWifiFix;
-    @BindView(R2.id.cb_wifi_fix_success)
-    CheckBox cbWifiFixSuccess;
-    @BindView(R2.id.cb_wifi_fix_fail)
-    CheckBox cbWifiFixFail;
-    @BindView(R2.id.cb_ble_fix)
-    CheckBox cbBleFix;
-    @BindView(R2.id.cb_ble_fix_success)
-    CheckBox cbBleFixSuccess;
-    @BindView(R2.id.cb_ble_fix_fail)
-    CheckBox cbBleFixFail;
-    @BindView(R2.id.cb_gps_fix)
-    CheckBox cbGpsFix;
-    @BindView(R2.id.cb_gps_fix_success)
-    CheckBox cbGpsFixSuccess;
-    @BindView(R2.id.cb_gps_fix_fail)
-    CheckBox cbGpsFixFail;
-    private boolean mReceiverTag = false;
+    @BindView(R2.id.cb_tlm)
+    CheckBox cbTlm;
+    @BindView(R2.id.tv_tlm_version)
+    TextView tvTlmVersion;
+
     private boolean savedParamsError;
+
+    private ArrayList<String> mValues;
+    private int mSelected;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.lw004_activity_indicator_settings);
+        setContentView(R.layout.lw004_activity_filter_tlm);
         ButterKnife.bind(this);
-
         EventBus.getDefault().register(this);
-        // 注册广播接收器
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
-        registerReceiver(mReceiver, filter);
-        mReceiverTag = true;
+        mValues = new ArrayList<>();
+        mValues.add("Null");
+        mValues.add("version 0");
+        mValues.add("version 1");
         showSyncingProgressDialog();
         List<OrderTask> orderTasks = new ArrayList<>();
-        orderTasks.add(OrderTaskAssembler.getIndicatorLight());
+        orderTasks.add(OrderTaskAssembler.getFilterEddystoneTlmVersion());
+        orderTasks.add(OrderTaskAssembler.getFilterEddystoneTlmEnable());
         LoRaLW004MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
     }
 
-    @Subscribe(threadMode = ThreadMode.POSTING, priority = 300)
+
+    @Subscribe(threadMode = ThreadMode.POSTING, priority = 400)
     public void onConnectStatusEvent(ConnectStatusEvent event) {
         final String action = event.getAction();
         runOnUiThread(() -> {
@@ -92,7 +72,7 @@ public class IndicatorSettingsActivity extends BaseActivity {
         });
     }
 
-    @Subscribe(threadMode = ThreadMode.POSTING, priority = 300)
+    @Subscribe(threadMode = ThreadMode.POSTING, priority = 400)
     public void onOrderTaskResponseEvent(OrderTaskResponseEvent event) {
         final String action = event.getAction();
         if (!MokoConstants.ACTION_CURRENT_DATA.equals(action))
@@ -125,12 +105,17 @@ public class IndicatorSettingsActivity extends BaseActivity {
                                 // write
                                 int result = value[4] & 0xFF;
                                 switch (configKeyEnum) {
-                                    case KEY_INDICATOR_LIGHT:
+                                    case KEY_FILTER_EDDYSTONE_TLM_VERSION:
+                                        if (result != 1) {
+                                            savedParamsError = true;
+                                        }
+                                        break;
+                                    case KEY_FILTER_EDDYSTONE_TLM_ENABLE:
                                         if (result != 1) {
                                             savedParamsError = true;
                                         }
                                         if (savedParamsError) {
-                                            ToastUtils.showToast(IndicatorSettingsActivity.this, "Opps！Save failed. Please check the input characters and try again.");
+                                            ToastUtils.showToast(FilterTLMActivity.this, "Opps！Save failed. Please check the input characters and try again.");
                                         } else {
                                             AlertMessageDialog dialog = new AlertMessageDialog();
                                             dialog.setMessage("Saved Successfully！");
@@ -144,21 +129,16 @@ public class IndicatorSettingsActivity extends BaseActivity {
                             if (flag == 0x00) {
                                 // read
                                 switch (configKeyEnum) {
-                                    case KEY_INDICATOR_LIGHT:
+                                    case KEY_FILTER_EDDYSTONE_TLM_VERSION:
                                         if (length > 0) {
-                                            byte[] indicatorBytes = Arrays.copyOfRange(value, 4, 4 + length);
-                                            int indicator = MokoUtils.toInt(indicatorBytes);
-                                            cbTamper.setChecked((indicator & 1) == 1);
-                                            cbLowPower.setChecked((indicator & 2) == 2);
-                                            cbBleFix.setChecked((indicator & 4) == 4);
-                                            cbBleFixSuccess.setChecked((indicator & 8) == 8);
-                                            cbBleFixFail.setChecked((indicator & 16) == 16);
-                                            cbGpsFix.setChecked((indicator & 32) == 32);
-                                            cbGpsFixSuccess.setChecked((indicator & 64) == 64);
-                                            cbGpsFixFail.setChecked((indicator & 128) == 128);
-                                            cbWifiFix.setChecked((indicator & 256) == 256);
-                                            cbWifiFixSuccess.setChecked((indicator & 512) == 512);
-                                            cbWifiFixFail.setChecked((indicator & 1024) == 1024);
+                                            mSelected = value[4] & 0xFF;
+                                            tvTlmVersion.setText(mValues.get(mSelected));
+                                        }
+                                        break;
+                                    case KEY_FILTER_EDDYSTONE_TLM_ENABLE:
+                                        if (length > 0) {
+                                            int enable = value[4] & 0xFF;
+                                            cbTlm.setChecked(enable == 1);
                                         }
                                         break;
                                 }
@@ -170,35 +150,32 @@ public class IndicatorSettingsActivity extends BaseActivity {
         });
     }
 
-
-    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-
-            if (intent != null) {
-                String action = intent.getAction();
-                if (BluetoothAdapter.ACTION_STATE_CHANGED.equals(action)) {
-                    int blueState = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, 0);
-                    switch (blueState) {
-                        case BluetoothAdapter.STATE_TURNING_OFF:
-                            dismissSyncProgressDialog();
-                            finish();
-                            break;
-                    }
-                }
-            }
+    public void onSave(View view) {
+        if (isWindowLocked())
+            return;
+        if (isValid()) {
+            showSyncingProgressDialog();
+            saveParams();
         }
-    };
+    }
+
+    private boolean isValid() {
+        return true;
+    }
+
+
+    private void saveParams() {
+        savedParamsError = false;
+        List<OrderTask> orderTasks = new ArrayList<>();
+        orderTasks.add(OrderTaskAssembler.setFilterEddystoneTlmVersion(mSelected));
+        orderTasks.add(OrderTaskAssembler.setFilterEddystoneTlmEnable(cbTlm.isChecked() ? 1 : 0));
+        LoRaLW004MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
+    }
+
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (mReceiverTag) {
-            mReceiverTag = false;
-            // 注销广播
-            unregisterReceiver(mReceiver);
-        }
         EventBus.getDefault().unregister(this);
     }
 
@@ -231,22 +208,16 @@ public class IndicatorSettingsActivity extends BaseActivity {
         finish();
     }
 
-    public void onSave(View view) {
+
+    public void onTLMVersion(View view) {
         if (isWindowLocked())
             return;
-        int indicator = (cbTamper.isChecked() ? 1 : 0)
-                | (cbLowPower.isChecked() ? 2 : 0)
-                | (cbBleFix.isChecked() ? 4 : 0)
-                | (cbBleFixSuccess.isChecked() ? 8 : 0)
-                | (cbBleFixFail.isChecked() ? 16 : 0)
-                | (cbGpsFix.isChecked() ? 32 : 00)
-                | (cbGpsFixSuccess.isChecked() ? 64 : 0)
-                | (cbGpsFixFail.isChecked() ? 128 : 0)
-                | (cbWifiFix.isChecked() ? 256 : 0)
-                | (cbWifiFixSuccess.isChecked() ? 512 : 0)
-                | (cbWifiFixFail.isChecked() ? 1024 : 0);
-        savedParamsError = false;
-        showSyncingProgressDialog();
-        LoRaLW004MokoSupport.getInstance().sendOrder(OrderTaskAssembler.setIndicatorLight(indicator));
+        BottomDialog dialog = new BottomDialog();
+        dialog.setDatas(mValues, mSelected);
+        dialog.setListener(value -> {
+            mSelected = value;
+            tvTlmVersion.setText(mValues.get(mSelected));
+        });
+        dialog.show(getSupportFragmentManager());
     }
 }

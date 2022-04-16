@@ -1,14 +1,10 @@
 package com.moko.lw004.activity;
 
 
-import android.bluetooth.BluetoothAdapter;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
-import android.text.TextUtils;
+import android.text.InputFilter;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.EditText;
 
 import com.moko.ble.lib.MokoConstants;
@@ -31,39 +27,45 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class PosWifiFixActivity extends BaseActivity {
+public class FilterUrlActivity extends BaseActivity {
 
-    @BindView(R2.id.et_pos_timeout)
-    EditText etPosTimeout;
-    @BindView(R2.id.et_bssid_number)
-    EditText etBssidNumber;
-    private boolean mReceiverTag = false;
+    private final String FILTER_ASCII = "[ -~]*";
+
+    @BindView(R2.id.cb_url)
+    CheckBox cbUrl;
+    @BindView(R2.id.et_url)
+    EditText etUrl;
     private boolean savedParamsError;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.lw004_activity_pos_wifi);
+        setContentView(R.layout.lw004_activity_filter_url);
         ButterKnife.bind(this);
         EventBus.getDefault().register(this);
-        // 注册广播接收器
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
-        registerReceiver(mReceiver, filter);
-        mReceiverTag = true;
+        InputFilter inputFilter = (source, start, end, dest, dstart, dend) -> {
+            if (!(source + "").matches(FILTER_ASCII)) {
+                return "";
+            }
+
+            return null;
+        };
+        etUrl.setFilters(new InputFilter[]{new InputFilter.LengthFilter(255), inputFilter});
         showSyncingProgressDialog();
         List<OrderTask> orderTasks = new ArrayList<>();
-        orderTasks.add(OrderTaskAssembler.getWifiPosNumber());
-        orderTasks.add(OrderTaskAssembler.getWifiPosBSSIDNumber());
+        orderTasks.add(OrderTaskAssembler.getFilterEddystoneUrlEnable());
+        orderTasks.add(OrderTaskAssembler.getFilterEddystoneUrl());
         LoRaLW004MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
     }
 
-    @Subscribe(threadMode = ThreadMode.POSTING, priority = 200)
+
+    @Subscribe(threadMode = ThreadMode.POSTING, priority = 400)
     public void onConnectStatusEvent(ConnectStatusEvent event) {
         final String action = event.getAction();
         runOnUiThread(() -> {
@@ -73,7 +75,7 @@ public class PosWifiFixActivity extends BaseActivity {
         });
     }
 
-    @Subscribe(threadMode = ThreadMode.POSTING, priority = 200)
+    @Subscribe(threadMode = ThreadMode.POSTING, priority = 400)
     public void onOrderTaskResponseEvent(OrderTaskResponseEvent event) {
         final String action = event.getAction();
         if (!MokoConstants.ACTION_CURRENT_DATA.equals(action))
@@ -106,17 +108,17 @@ public class PosWifiFixActivity extends BaseActivity {
                                 // write
                                 int result = value[4] & 0xFF;
                                 switch (configKeyEnum) {
-                                    case KEY_WIFI_POS_NUMBER:
+                                    case KEY_FILTER_EDDYSTONE_URL:
                                         if (result != 1) {
                                             savedParamsError = true;
                                         }
                                         break;
-                                    case KEY_WIFI_POS_BSSID_NUMBER:
+                                    case KEY_FILTER_EDDYSTONE_URL_ENABLE:
                                         if (result != 1) {
                                             savedParamsError = true;
                                         }
                                         if (savedParamsError) {
-                                            ToastUtils.showToast(PosWifiFixActivity.this, "Opps！Save failed. Please check the input characters and try again.");
+                                            ToastUtils.showToast(FilterUrlActivity.this, "Opps！Save failed. Please check the input characters and try again.");
                                         } else {
                                             AlertMessageDialog dialog = new AlertMessageDialog();
                                             dialog.setMessage("Saved Successfully！");
@@ -130,16 +132,16 @@ public class PosWifiFixActivity extends BaseActivity {
                             if (flag == 0x00) {
                                 // read
                                 switch (configKeyEnum) {
-                                    case KEY_WIFI_POS_NUMBER:
+                                    case KEY_FILTER_EDDYSTONE_URL:
                                         if (length > 0) {
-                                            int number = value[4] & 0xFF;
-                                            etPosTimeout.setText(String.valueOf(number));
+                                            String url = new String(Arrays.copyOfRange(value, 4, 4 + length));
+                                            etUrl.setText(String.valueOf(url));
                                         }
                                         break;
-                                    case KEY_WIFI_POS_BSSID_NUMBER:
+                                    case KEY_FILTER_EDDYSTONE_URL_ENABLE:
                                         if (length > 0) {
-                                            int number = value[4] & 0xFF;
-                                            etBssidNumber.setText(String.valueOf(number));
+                                            int enable = value[4] & 0xFF;
+                                            cbUrl.setChecked(enable == 1);
                                         }
                                         break;
                                 }
@@ -157,72 +159,27 @@ public class PosWifiFixActivity extends BaseActivity {
         if (isValid()) {
             showSyncingProgressDialog();
             saveParams();
-        } else {
-            ToastUtils.showToast(this, "Opps！Save failed. Please check the input characters and try again.");
         }
     }
 
     private boolean isValid() {
-        final String posTimeoutStr = etPosTimeout.getText().toString();
-        if (TextUtils.isEmpty(posTimeoutStr))
-            return false;
-        final int posTimeout = Integer.parseInt(posTimeoutStr);
-        if (posTimeout < 1 || posTimeout > 5) {
-            return false;
-        }
-        final String numberStr = etBssidNumber.getText().toString();
-        if (TextUtils.isEmpty(numberStr))
-            return false;
-        final int number = Integer.parseInt(numberStr);
-        if (number < 1 || number > 5) {
-            return false;
-        }
         return true;
-
     }
 
 
     private void saveParams() {
-        final String posTimeoutStr = etPosTimeout.getText().toString();
-        final String numberStr = etBssidNumber.getText().toString();
-        final int posTimeout = Integer.parseInt(posTimeoutStr);
-        final int number = Integer.parseInt(numberStr);
+        final String url = etUrl.getText().toString();
         savedParamsError = false;
         List<OrderTask> orderTasks = new ArrayList<>();
-        orderTasks.add(OrderTaskAssembler.setWifiPosNumber(posTimeout));
-        orderTasks.add(OrderTaskAssembler.setWifiPosBSSIDNumber(number));
+        orderTasks.add(OrderTaskAssembler.setFilterEddystoneUrl(url));
+        orderTasks.add(OrderTaskAssembler.setFilterEddystoneUrlEnable(cbUrl.isChecked() ? 1 : 0));
         LoRaLW004MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
     }
 
 
-    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-
-            if (intent != null) {
-                String action = intent.getAction();
-                if (BluetoothAdapter.ACTION_STATE_CHANGED.equals(action)) {
-                    int blueState = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, 0);
-                    switch (blueState) {
-                        case BluetoothAdapter.STATE_TURNING_OFF:
-                            dismissSyncProgressDialog();
-                            finish();
-                            break;
-                    }
-                }
-            }
-        }
-    };
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (mReceiverTag) {
-            mReceiverTag = false;
-            // 注销广播
-            unregisterReceiver(mReceiver);
-        }
         EventBus.getDefault().unregister(this);
     }
 

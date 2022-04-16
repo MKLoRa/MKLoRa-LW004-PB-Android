@@ -26,21 +26,21 @@ public class DeviceFragment extends Fragment {
     private static final String TAG = DeviceFragment.class.getSimpleName();
     @BindView(R2.id.tv_time_zone)
     TextView tvTimeZone;
-    @BindView(R2.id.iv_shutdown_payload)
-    ImageView ivShutdownPayload;
-    @BindView(R2.id.iv_low_power_payload)
-    ImageView ivLowPowerPayload;
     @BindView(R2.id.tv_low_power_prompt)
     TextView tvLowPowerPrompt;
     @BindView(R2.id.tv_low_power_prompt_tips)
     TextView tvLowPowerPromptTips;
-    @BindView(R2.id.iv_power_off)
-    ImageView ivPowerOff;
+    @BindView(R2.id.iv_low_power_payload)
+    ImageView ivLowPowerPayload;
+    @BindView(R2.id.tv_vibration_intensity)
+    TextView tvVibrationIntensity;
+
     private ArrayList<String> mTimeZones;
     private int mSelectedTimeZone;
     private ArrayList<String> mLowPowerPrompts;
     private int mSelectedLowPowerPrompt;
-    private boolean mShutdownPayloadEnable;
+    private ArrayList<String> mVibrationIntensity;
+    private int mSelectedVibrationIntensity;
     private boolean mLowPowerPayloadEnable;
 
 
@@ -63,23 +63,40 @@ public class DeviceFragment extends Fragment {
         ButterKnife.bind(this, view);
         activity = (DeviceInfoActivity) getActivity();
         mTimeZones = new ArrayList<>();
-        for (int i = -12; i < 13; i++) {
+        for (int i = -24; i <= 28; i++) {
             if (i < 0) {
-                mTimeZones.add(String.format("UTC%d", i));
+                if (i % 2 == 0) {
+                    mTimeZones.add(String.format("UTC%d", i / 2));
+                } else {
+                    mTimeZones.add(i < -1 ? String.format("UTC%d:30", (i + 1) / 2) : "UTC-0:30");
+                }
             } else if (i == 0) {
                 mTimeZones.add("UTC");
             } else {
-                mTimeZones.add(String.format("UTC+%d", i));
+                if (i % 2 == 0) {
+                    mTimeZones.add(String.format("UTC+%d", i / 2));
+                } else {
+                    mTimeZones.add(String.format("UTC+%d:30", (i - 1) / 2));
+                }
             }
         }
         mLowPowerPrompts = new ArrayList<>();
-        mLowPowerPrompts.add("5%");
         mLowPowerPrompts.add("10%");
+        mLowPowerPrompts.add("20%");
+        mLowPowerPrompts.add("30%");
+        mLowPowerPrompts.add("40%");
+        mLowPowerPrompts.add("50%");
+        mLowPowerPrompts.add("60%");
+        mVibrationIntensity = new ArrayList<>();
+        mVibrationIntensity.add("No");
+        mVibrationIntensity.add("Low");
+        mVibrationIntensity.add("Medium");
+        mVibrationIntensity.add("High");
         return view;
     }
 
     public void setTimeZone(int timeZone) {
-        mSelectedTimeZone = timeZone + 12;
+        mSelectedTimeZone = timeZone + 24;
         tvTimeZone.setText(mTimeZones.get(mSelectedTimeZone));
     }
 
@@ -90,32 +107,18 @@ public class DeviceFragment extends Fragment {
             mSelectedTimeZone = value;
             tvTimeZone.setText(mTimeZones.get(value));
             activity.showSyncingProgressDialog();
-            LoRaLW004MokoSupport.getInstance().sendOrder(OrderTaskAssembler.setTimeZone(value - 12));
+            ArrayList<OrderTask> orderTasks = new ArrayList<>();
+            orderTasks.add(OrderTaskAssembler.setTimeZone(value - 24));
+            orderTasks.add(OrderTaskAssembler.getTimeZone());
+            LoRaLW004MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
         });
         dialog.show(activity.getSupportFragmentManager());
     }
 
-
-    public void setShutdownPayload(int enable) {
-        mShutdownPayloadEnable = enable == 1;
-        ivShutdownPayload.setImageResource(mShutdownPayloadEnable ? R.drawable.lw004_ic_checked : R.drawable.lw004_ic_unchecked);
-    }
-
     public void setLowPower(int lowPower) {
-        if ((lowPower & 1) == 1) {
-            mSelectedLowPowerPrompt = 1;
-        } else {
-            mSelectedLowPowerPrompt = 0;
-        }
+        mSelectedLowPowerPrompt = (lowPower / 10) - 1;
         tvLowPowerPrompt.setText(mLowPowerPrompts.get(mSelectedLowPowerPrompt));
-        tvLowPowerPromptTips.setText(getString(R.string.low_power_prompt_tips, mLowPowerPrompts.get(mSelectedLowPowerPrompt)));
-        if ((lowPower & 2) == 2) {
-            mLowPowerPayloadEnable = true;
-            ivLowPowerPayload.setImageResource(R.drawable.lw004_ic_checked);
-        } else {
-            mLowPowerPayloadEnable = false;
-            ivLowPowerPayload.setImageResource(R.drawable.lw004_ic_unchecked);
-        }
+        tvLowPowerPromptTips.setText(getString(R.string.low_power_prompt_tips_lw004, mLowPowerPrompts.get(mSelectedLowPowerPrompt)));
     }
 
     public void showLowPowerDialog() {
@@ -124,31 +127,70 @@ public class DeviceFragment extends Fragment {
         dialog.setListener(value -> {
             mSelectedLowPowerPrompt = value;
             tvLowPowerPrompt.setText(mLowPowerPrompts.get(value));
-            tvLowPowerPromptTips.setText(getString(R.string.low_power_prompt_tips, mLowPowerPrompts.get(value)));
-            int lowPower = mSelectedLowPowerPrompt | (mLowPowerPayloadEnable ? 2 : 0);
+            tvLowPowerPromptTips.setText(getString(R.string.low_power_prompt_tips_lw004, mLowPowerPrompts.get(value)));
             activity.showSyncingProgressDialog();
-            LoRaLW004MokoSupport.getInstance().sendOrder(OrderTaskAssembler.setLowPower(lowPower));
+            ArrayList<OrderTask> orderTasks = new ArrayList<>();
+            orderTasks.add(OrderTaskAssembler.setLowPowerPercent((value + 1) * 10));
+            orderTasks.add(OrderTaskAssembler.getLowPowerPercent());
+            LoRaLW004MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
         });
         dialog.show(activity.getSupportFragmentManager());
 
     }
 
-    public void changeShutdownPayload() {
-        mShutdownPayloadEnable = !mShutdownPayloadEnable;
-        activity.showSyncingProgressDialog();
-        ArrayList<OrderTask> orderTasks = new ArrayList<>();
-        orderTasks.add(OrderTaskAssembler.setShutdownInfoReport(mShutdownPayloadEnable ? 1 : 0));
-        orderTasks.add(OrderTaskAssembler.getShutdownInfoReport());
-        LoRaLW004MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
-    }
-
     public void changeLowPowerPayload() {
         mLowPowerPayloadEnable = !mLowPowerPayloadEnable;
         activity.showSyncingProgressDialog();
-        int lowPower = mSelectedLowPowerPrompt | (mLowPowerPayloadEnable ? 2 : 0);
         ArrayList<OrderTask> orderTasks = new ArrayList<>();
-        orderTasks.add(OrderTaskAssembler.setLowPower(lowPower));
-        orderTasks.add(OrderTaskAssembler.getLowPower());
+        orderTasks.add(OrderTaskAssembler.setLowPowerReportEnable(mLowPowerPayloadEnable ? 1 : 0));
+        orderTasks.add(OrderTaskAssembler.getLowPowerReportEnable());
         LoRaLW004MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
+    }
+
+    public void setLowPowerPayload(int enable) {
+        if (enable == 1) {
+            mLowPowerPayloadEnable = true;
+            ivLowPowerPayload.setImageResource(R.drawable.lw004_ic_checked);
+        } else {
+            mLowPowerPayloadEnable = false;
+            ivLowPowerPayload.setImageResource(R.drawable.lw004_ic_unchecked);
+        }
+    }
+
+    public void setVibrationIntensity(int intensity) {
+        if (intensity == 0) {
+            mSelectedVibrationIntensity = 0;
+        } else if (intensity == 10) {
+            mSelectedVibrationIntensity = 1;
+        } else if (intensity == 50) {
+            mSelectedVibrationIntensity = 2;
+        } else if (intensity == 80) {
+            mSelectedVibrationIntensity = 3;
+        }
+        tvVibrationIntensity.setText(mVibrationIntensity.get(mSelectedVibrationIntensity));
+    }
+
+    public void onVibrationIntensity() {
+        BottomDialog dialog = new BottomDialog();
+        dialog.setDatas(mVibrationIntensity, mSelectedVibrationIntensity);
+        dialog.setListener(value -> {
+            mSelectedVibrationIntensity = value;
+            tvVibrationIntensity.setText(mVibrationIntensity.get(value));
+            int intensity = 0;
+            if (mSelectedVibrationIntensity == 1) {
+                intensity = 10;
+            } else if (mSelectedVibrationIntensity == 2) {
+                intensity = 50;
+            } else if (mSelectedVibrationIntensity == 3) {
+                intensity = 80;
+            }
+            activity.showSyncingProgressDialog();
+            ArrayList<OrderTask> orderTasks = new ArrayList<>();
+            orderTasks.add(OrderTaskAssembler.setVibrationIntensity(intensity));
+            orderTasks.add(OrderTaskAssembler.getVibrationIntensity());
+            LoRaLW004MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
+        });
+        dialog.show(activity.getSupportFragmentManager());
+
     }
 }

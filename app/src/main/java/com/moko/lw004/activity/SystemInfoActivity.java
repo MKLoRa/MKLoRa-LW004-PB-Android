@@ -88,8 +88,8 @@ public class SystemInfoActivity extends BaseActivity {
         showSyncingProgressDialog();
         List<OrderTask> orderTasks = new ArrayList<>();
         orderTasks.add(OrderTaskAssembler.getAdvName());
-        orderTasks.add(OrderTaskAssembler.getMacAddress());
-        orderTasks.add(OrderTaskAssembler.getBattery());
+        orderTasks.add(OrderTaskAssembler.getMac());
+        orderTasks.add(OrderTaskAssembler.getVoltage());
         orderTasks.add(OrderTaskAssembler.getDeviceModel());
         orderTasks.add(OrderTaskAssembler.getSoftwareVersion());
         orderTasks.add(OrderTaskAssembler.getFirmwareVersion());
@@ -170,7 +170,7 @@ public class SystemInfoActivity extends BaseActivity {
                                             mDeviceName = new String(rawDataBytes);
                                         }
                                         break;
-                                    case KEY_BATTERY_POWER:
+                                    case KEY_VOLTAGE:
                                         if (length > 0) {
                                             byte[] batteryBytes = Arrays.copyOfRange(value, 4, 4 + length);
                                             int battery = MokoUtils.toInt(batteryBytes);
@@ -178,7 +178,7 @@ public class SystemInfoActivity extends BaseActivity {
                                             tvBatteryVoltage.setText(String.format("%sV", batteryStr));
                                         }
                                         break;
-                                    case KEY_CHIP_MAC:
+                                    case KEY_MAC:
                                         if (length > 0) {
                                             byte[] macBytes = Arrays.copyOfRange(value, 4, 4 + length);
                                             String mac = MokoUtils.bytesToHexString(macBytes);

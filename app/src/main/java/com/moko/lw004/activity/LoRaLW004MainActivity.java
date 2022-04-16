@@ -36,7 +36,7 @@ import com.moko.lw004.dialog.LoadingMessageDialog;
 import com.moko.lw004.dialog.PasswordDialog;
 import com.moko.lw004.dialog.ScanFilterDialog;
 import com.moko.lw004.entity.AdvInfo;
-import com.moko.lw004.utils.BeaconInfoParseableImpl;
+import com.moko.lw004.utils.AdvInfoAnalysisImpl;
 import com.moko.lw004.utils.SPUtiles;
 import com.moko.lw004.utils.ToastUtils;
 import com.moko.support.lw004.LoRaLW004MokoSupport;
@@ -88,6 +88,7 @@ public class LoRaLW004MainActivity extends BaseActivity implements MokoScanDevic
     private MokoBleScanner mokoBleScanner;
     public Handler mHandler;
     private boolean isPasswordError;
+    private boolean isVerifyEnable;
 
     public static String PATH_LOGCAT;
 
@@ -144,7 +145,7 @@ public class LoRaLW004MainActivity extends BaseActivity implements MokoScanDevic
         }
         animation = AnimationUtils.loadAnimation(this, R.anim.lw004_rotate_refresh);
         ivRefresh.startAnimation(animation);
-        beaconInfoParseable = new BeaconInfoParseableImpl();
+        beaconInfoParseable = new AdvInfoAnalysisImpl();
         mokoBleScanner.startScanDevice(this);
         mHandler.postDelayed(new Runnable() {
             @Override
@@ -155,7 +156,7 @@ public class LoRaLW004MainActivity extends BaseActivity implements MokoScanDevic
     }
 
 
-    private BeaconInfoParseableImpl beaconInfoParseable;
+    private AdvInfoAnalysisImpl beaconInfoParseable;
     public String filterName;
     public int filterRssi = -127;
 
@@ -350,10 +351,16 @@ public class LoRaLW004MainActivity extends BaseActivity implements MokoScanDevic
             return;
         }
         AdvInfo advInfo = (AdvInfo) adapter.getItem(position);
-        if (advInfo.connectable && advInfo != null && !isFinishing()) {
+        if (advInfo != null && advInfo.connectable && !isFinishing()) {
             if (animation != null) {
                 mHandler.removeMessages(0);
                 mokoBleScanner.stopScanDevice();
+            }
+            isVerifyEnable = advInfo.verifyEnable;
+            if (!isVerifyEnable) {
+                showLoadingProgressDialog();
+                ivRefresh.postDelayed(() -> LoRaLW004MokoSupport.getInstance().connDevice(advInfo.mac), 500);
+                return;
             }
             // show password
             final PasswordDialog dialog = new PasswordDialog(LoRaLW004MainActivity.this);
@@ -437,6 +444,12 @@ public class LoRaLW004MainActivity extends BaseActivity implements MokoScanDevic
         }
         if (MokoConstants.ACTION_DISCOVER_SUCCESS.equals(action)) {
             dismissLoadingProgressDialog();
+            if (!isVerifyEnable) {
+                XLog.i("Success");
+                Intent i = new Intent(LoRaLW004MainActivity.this, DeviceInfoActivity.class);
+                startActivityForResult(i, AppConstants.REQUEST_CODE_DEVICE_INFO);
+                return;
+            }
             showLoadingMessageDialog();
             mHandler.postDelayed(() -> {
                 // open password notify and set passwrord

@@ -94,7 +94,7 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
         fragmentManager = getFragmentManager();
         initFragment();
         radioBtnLora.setChecked(true);
-        tvTitle.setText(R.string.title_lora);
+        tvTitle.setText(R.string.title_lora_lw004);
         rgOptions.setOnCheckedChangeListener(this);
         EventBus.getDefault().register(this);
         mUploadMode = new ArrayList<>();
@@ -230,15 +230,15 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
                                 // write
                                 int result = value[4] & 0xFF;
                                 switch (configKeyEnum) {
-                                    case KEY_TIME:
+                                    case KEY_TIME_UTC:
                                         if (result == 1)
                                             ToastUtils.showToast(DeviceInfoActivity.this, "Time sync completed!");
                                         break;
-                                    case KEY_OFFLINE_LOCATION:
                                     case KEY_HEARTBEAT_INTERVAL:
                                     case KEY_TIME_ZONE:
-                                    case KEY_SHUTDOWN_INFO_REPORT:
-                                    case KEY_LOW_POWER:
+                                    case KEY_VIBRATION_INTENSITY:
+                                    case KEY_LOW_POWER_REPORT_ENABLE:
+                                    case KEY_LOW_POWER_PERCENT:
                                         if (result != 1) {
                                             savedParamsError = true;
                                         }
@@ -279,12 +279,6 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
                                             loraFragment.setLoraStatus(networkStatus);
                                         }
                                         break;
-                                    case KEY_OFFLINE_LOCATION:
-                                        if (length > 0) {
-                                            int enable = value[4] & 0xFF;
-                                            posFragment.setOfflineFix(enable);
-                                        }
-                                        break;
                                     case KEY_HEARTBEAT_INTERVAL:
                                         if (length > 0) {
                                             byte[] intervalBytes = Arrays.copyOfRange(value, 4, 4 + length);
@@ -297,16 +291,22 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
                                             deviceFragment.setTimeZone(timeZone);
                                         }
                                         break;
-                                    case KEY_SHUTDOWN_INFO_REPORT:
+                                    case KEY_LOW_POWER_REPORT_ENABLE:
                                         if (length > 0) {
                                             int enable = value[4] & 0xFF;
-                                            deviceFragment.setShutdownPayload(enable);
+                                            deviceFragment.setLowPowerPayload(enable);
                                         }
                                         break;
-                                    case KEY_LOW_POWER:
+                                    case KEY_LOW_POWER_PERCENT:
                                         if (length > 0) {
                                             int lowPower = value[4] & 0xFF;
                                             deviceFragment.setLowPower(lowPower);
+                                        }
+                                        break;
+                                    case KEY_VIBRATION_INTENSITY:
+                                        if (length > 0) {
+                                            int intensity = value[4] & 0xFF;
+                                            deviceFragment.setVibrationIntensity(intensity);
                                         }
                                         break;
                                 }
@@ -320,7 +320,7 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
     }
 
     private void showDisconnectDialog() {
-        if (disConnectType == 2) {
+        if (disConnectType == 3) {
             AlertMessageDialog dialog = new AlertMessageDialog();
             dialog.setTitle("Change Password");
             dialog.setMessage("Password changed successfully!Please reconnect the device.");
@@ -331,7 +331,7 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
                 finish();
             });
             dialog.show(getSupportFragmentManager());
-        } else if (disConnectType == 3) {
+        } else if (disConnectType == 2) {
             AlertMessageDialog dialog = new AlertMessageDialog();
             dialog.setMessage("No data communication for 3 minutes, the device is disconnected.");
             dialog.setConfirm("OK");
@@ -341,10 +341,21 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
                 finish();
             });
             dialog.show(getSupportFragmentManager());
+        } else if (disConnectType == 5) {
+            AlertMessageDialog dialog = new AlertMessageDialog();
+            dialog.setTitle("Factory Reset");
+            dialog.setMessage("Factory reset successfully!\nPlease reconnect the device.");
+            dialog.setConfirm("OK");
+            dialog.setCancelGone();
+            dialog.setOnAlertConfirmListener(() -> {
+                setResult(RESULT_OK);
+                finish();
+            });
+            dialog.show(getSupportFragmentManager());
         } else if (disConnectType == 4) {
             AlertMessageDialog dialog = new AlertMessageDialog();
-            dialog.setTitle("Reset Successfully");
-            dialog.setMessage("Reset successfully!Please reconnect the device.");
+            dialog.setTitle("Dismiss");
+            dialog.setMessage("Reboot successfully!\nPlease reconnect the device");
             dialog.setConfirm("OK");
             dialog.setCancelGone();
             dialog.setOnAlertConfirmListener(() -> {
@@ -482,7 +493,7 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
                 showSyncingProgressDialog();
                 generalFragment.saveParams();
             } else {
-                ToastUtils.showToast(this, "Opps！Save failed. Please check the input characters and try again.");
+                ToastUtils.showToast(this, "Para error!");
             }
         }
     }
@@ -527,8 +538,9 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
         List<OrderTask> orderTasks = new ArrayList<>();
         // device
         orderTasks.add(OrderTaskAssembler.getTimeZone());
-        orderTasks.add(OrderTaskAssembler.getShutdownInfoReport());
-        orderTasks.add(OrderTaskAssembler.getLowPower());
+        orderTasks.add(OrderTaskAssembler.getLowPowerPercent());
+        orderTasks.add(OrderTaskAssembler.getLowPowerReportEnable());
+        orderTasks.add(OrderTaskAssembler.getVibrationIntensity());
         LoRaLW004MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
     }
 
@@ -554,12 +566,10 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
                 .hide(generalFragment)
                 .hide(deviceFragment)
                 .commit();
-        showSyncingProgressDialog();
-        LoRaLW004MokoSupport.getInstance().sendOrder(OrderTaskAssembler.getOfflineLocation());
     }
 
     private void showLoRaAndGetData() {
-        tvTitle.setText(R.string.title_lora);
+        tvTitle.setText(R.string.title_lora_lw004);
         ivSave.setVisibility(View.GONE);
         fragmentManager.beginTransaction()
                 .show(loraFragment)
@@ -609,13 +619,6 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
         startActivity(intent);
     }
 
-    public void onWifiFix(View view) {
-        if (isWindowLocked())
-            return;
-        Intent intent = new Intent(this, PosWifiFixActivity.class);
-        startActivity(intent);
-    }
-
     public void onBleFix(View view) {
         if (isWindowLocked())
             return;
@@ -658,22 +661,23 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
         startActivity(intent);
     }
 
-    public void onLocalDataSync(View view) {
-        if (isWindowLocked())
-            return;
-        startActivity(new Intent(this, ExportDataActivity.class));
-    }
-
-    public void onIndicatorSettings(View view) {
-        if (isWindowLocked())
-            return;
-        startActivity(new Intent(this, IndicatorSettingsActivity.class));
-    }
-
     public void selectTimeZone(View view) {
         if (isWindowLocked())
             return;
         deviceFragment.showTimeZoneDialog();
+    }
+
+
+    public void onLowPowerPayload(View view) {
+        if (isWindowLocked())
+            return;
+        deviceFragment.changeLowPowerPayload();
+    }
+
+    public void onVibrationIntensity(View view) {
+        if (isWindowLocked())
+            return;
+        deviceFragment.onVibrationIntensity();
     }
 
     public void onOnOff(View view) {
@@ -708,35 +712,4 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
         dialog.show(getSupportFragmentManager());
     }
 
-    public void onPowerOff(View view) {
-        if (isWindowLocked())
-            return;
-        AlertMessageDialog dialog = new AlertMessageDialog();
-        dialog.setTitle("Warning!");
-        dialog.setMessage("Are you sure to turn off the device? Please make sure the device has a button to turn on!");
-        dialog.setConfirm("OK");
-        dialog.setOnAlertConfirmListener(() -> {
-            showSyncingProgressDialog();
-            LoRaLW004MokoSupport.getInstance().sendOrder(OrderTaskAssembler.setWorkMode(0));
-        });
-        dialog.show(getSupportFragmentManager());
-    }
-
-    public void onOfflineFix(View view) {
-        if (isWindowLocked())
-            return;
-        posFragment.changeOfflineFix();
-    }
-
-    public void onShutdownPayload(View view) {
-        if (isWindowLocked())
-            return;
-        deviceFragment.changeShutdownPayload();
-    }
-
-    public void onLowPowerPayload(View view) {
-        if (isWindowLocked())
-            return;
-        deviceFragment.changeLowPowerPayload();
-    }
 }

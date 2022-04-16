@@ -1,26 +1,20 @@
 package com.moko.lw004.activity;
 
 
-import android.bluetooth.BluetoothAdapter;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.view.View;
-import android.widget.CheckBox;
-import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.moko.ble.lib.MokoConstants;
 import com.moko.ble.lib.event.ConnectStatusEvent;
 import com.moko.ble.lib.event.OrderTaskResponseEvent;
 import com.moko.ble.lib.task.OrderTask;
 import com.moko.ble.lib.task.OrderTaskResponse;
-import com.moko.ble.lib.utils.MokoUtils;
 import com.moko.lw004.R;
 import com.moko.lw004.R2;
 import com.moko.lw004.dialog.AlertMessageDialog;
+import com.moko.lw004.dialog.BottomDialog;
 import com.moko.lw004.dialog.LoadingMessageDialog;
 import com.moko.lw004.utils.ToastUtils;
 import com.moko.support.lw004.LoRaLW004MokoSupport;
@@ -33,40 +27,59 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class ActiveStateCountActivity extends BaseActivity {
+public class AlarmAlertSettingsActivity extends BaseActivity {
 
-    @BindView(R2.id.cb_active_state_count)
-    CheckBox cbActiveStateCount;
-    @BindView(R2.id.et_active_state_timeout)
-    EditText etActiveStateTimeout;
-    private boolean mReceiverTag = false;
+
+    @BindView(R2.id.tv_trigger_mode)
+    TextView tvTriggerMode;
+    @BindView(R2.id.tv_alert_pos_strategy)
+    TextView tvAlertStrategy;
+    @BindView(R2.id.iv_alert_on_start)
+    ImageView ivAlertOnStart;
+    @BindView(R2.id.iv_alert_on_end)
+    ImageView ivAlertOnEnd;
+    private ArrayList<String> mValues;
+    private int mSelected;
+    private ArrayList<String> mTriggerModeValues;
+    private int mTriggerModeSelected;
     private boolean savedParamsError;
+
+    private boolean mAlertOnStartEnable;
+    private boolean mAlertOnEndEnable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.lw004_activity_active_state_count);
+        setContentView(R.layout.lw004_activity_alarm_alert_settings);
         ButterKnife.bind(this);
+        mValues = new ArrayList<>();
+        mValues.add("BLE");
+        mValues.add("GPS");
+        mValues.add("BLE&GPS");
+        mTriggerModeValues = new ArrayList<>();
+        mTriggerModeValues.add("Single Click");
+        mTriggerModeValues.add("Double Click");
+        mTriggerModeValues.add("Long press 1s");
+        mTriggerModeValues.add("Long press 2s");
+        mTriggerModeValues.add("Long press 3s");
+        mTriggerModeValues.add("Long press 4s");
+        mTriggerModeValues.add("Long press 5s");
         EventBus.getDefault().register(this);
-        // 注册广播接收器
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
-        registerReceiver(mReceiver, filter);
-        mReceiverTag = true;
         showSyncingProgressDialog();
         List<OrderTask> orderTasks = new ArrayList<>();
-        orderTasks.add(OrderTaskAssembler.getActiveStateEnable());
-        orderTasks.add(OrderTaskAssembler.getActiveStateTimeout());
+        orderTasks.add(OrderTaskAssembler.getAlarmAlertTriggerMode());
+        orderTasks.add(OrderTaskAssembler.getAlarmAlertPosStrategy());
+        orderTasks.add(OrderTaskAssembler.getAlarmAlertStartEventNotifyEnable());
+        orderTasks.add(OrderTaskAssembler.getAlarmAlertEndEventNotifyEnable());
         LoRaLW004MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
     }
 
-    @Subscribe(threadMode = ThreadMode.POSTING, priority = 300)
+    @Subscribe(threadMode = ThreadMode.POSTING, priority = 400)
     public void onConnectStatusEvent(ConnectStatusEvent event) {
         final String action = event.getAction();
         runOnUiThread(() -> {
@@ -76,7 +89,7 @@ public class ActiveStateCountActivity extends BaseActivity {
         });
     }
 
-    @Subscribe(threadMode = ThreadMode.POSTING, priority = 300)
+    @Subscribe(threadMode = ThreadMode.POSTING, priority = 400)
     public void onOrderTaskResponseEvent(OrderTaskResponseEvent event) {
         final String action = event.getAction();
         if (!MokoConstants.ACTION_CURRENT_DATA.equals(action))
@@ -109,17 +122,15 @@ public class ActiveStateCountActivity extends BaseActivity {
                                 // write
                                 int result = value[4] & 0xFF;
                                 switch (configKeyEnum) {
-                                    case KEY_ACTIVE_STATE_ENABLE:
-                                        if (result != 1) {
-                                            savedParamsError = true;
-                                        }
-                                        break;
-                                    case KEY_ACTIVE_STATE_TIMEOUT:
+                                    case KEY_ALARM_ALERT_POS_STRATEGY:
+                                    case KEY_ALARM_ALERT_START_EVENT_NOTIFY_ENABLE:
+                                    case KEY_ALARM_ALERT_END_EVENT_NOTIFY_ENABLE:
+                                    case KEY_ALARM_ALERT_TRIGGER_MODE:
                                         if (result != 1) {
                                             savedParamsError = true;
                                         }
                                         if (savedParamsError) {
-                                            ToastUtils.showToast(ActiveStateCountActivity.this, "Opps！Save failed. Please check the input characters and try again.");
+                                            ToastUtils.showToast(AlarmAlertSettingsActivity.this, "Opps！Save failed. Please check the input characters and try again.");
                                         } else {
                                             AlertMessageDialog dialog = new AlertMessageDialog();
                                             dialog.setMessage("Saved Successfully！");
@@ -133,17 +144,29 @@ public class ActiveStateCountActivity extends BaseActivity {
                             if (flag == 0x00) {
                                 // read
                                 switch (configKeyEnum) {
-                                    case KEY_ACTIVE_STATE_ENABLE:
+                                    case KEY_ALARM_ALERT_POS_STRATEGY:
                                         if (length > 0) {
-                                            int enable = value[4] & 0xFF;
-                                            cbActiveStateCount.setChecked(enable == 1);
+                                            int strategy = value[4] & 0xFF;
+                                            mSelected = strategy;
+                                            tvAlertStrategy.setText(mValues.get(mSelected));
                                         }
                                         break;
-                                    case KEY_ACTIVE_STATE_TIMEOUT:
+                                    case KEY_ALARM_ALERT_START_EVENT_NOTIFY_ENABLE:
                                         if (length > 0) {
-                                            byte[] timeoutBytes = Arrays.copyOfRange(value, 4, 4 + length);
-                                            int timeout = MokoUtils.toInt(timeoutBytes);
-                                            etActiveStateTimeout.setText(String.valueOf(timeout));
+                                            mAlertOnStartEnable = value[4] == 1;
+                                            ivAlertOnStart.setImageResource(mAlertOnStartEnable ? R.drawable.lw004_ic_checked : R.drawable.lw004_ic_unchecked);
+                                        }
+                                        break;
+                                    case KEY_ALARM_ALERT_END_EVENT_NOTIFY_ENABLE:
+                                        if (length > 0) {
+                                            mAlertOnEndEnable = value[4] == 1;
+                                            ivAlertOnEnd.setImageResource(mAlertOnEndEnable ? R.drawable.lw004_ic_checked : R.drawable.lw004_ic_unchecked);
+                                        }
+                                        break;
+                                    case KEY_ALARM_ALERT_TRIGGER_MODE:
+                                        if (length > 0) {
+                                            mTriggerModeSelected = value[4] & 0xFF;
+                                            tvTriggerMode.setText(mTriggerModeValues.get(mTriggerModeSelected));
                                         }
                                         break;
                                 }
@@ -155,35 +178,10 @@ public class ActiveStateCountActivity extends BaseActivity {
         });
     }
 
-
-    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-
-            if (intent != null) {
-                String action = intent.getAction();
-                if (BluetoothAdapter.ACTION_STATE_CHANGED.equals(action)) {
-                    int blueState = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, 0);
-                    switch (blueState) {
-                        case BluetoothAdapter.STATE_TURNING_OFF:
-                            dismissSyncProgressDialog();
-                            finish();
-                            break;
-                    }
-                }
-            }
-        }
-    };
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (mReceiverTag) {
-            mReceiverTag = false;
-            // 注销广播
-            unregisterReceiver(mReceiver);
-        }
+
         EventBus.getDefault().unregister(this);
     }
 
@@ -216,22 +214,57 @@ public class ActiveStateCountActivity extends BaseActivity {
         finish();
     }
 
-    public void onSave(View view) {
-        final String timeoutStr = etActiveStateTimeout.getText().toString();
-        if (TextUtils.isEmpty(timeoutStr)) {
-            ToastUtils.showToast(this, "Opps！Save failed. Please check the input characters and try again.");
+    public void selectPosStrategy(View view) {
+        if (isWindowLocked())
             return;
-        }
-        final int timeout = Integer.parseInt(timeoutStr);
-        if (timeout < 1 || timeout > 86400) {
-            ToastUtils.showToast(this, "Opps！Save failed. Please check the input characters and try again.");
+        BottomDialog dialog = new BottomDialog();
+        dialog.setDatas(mValues, mSelected);
+        dialog.setListener(value -> {
+            mSelected = value;
+            tvAlertStrategy.setText(mValues.get(value));
+            savedParamsError = false;
+            showSyncingProgressDialog();
+            LoRaLW004MokoSupport.getInstance().sendOrder(OrderTaskAssembler.setAlarmAlertPosStrategy(mSelected));
+        });
+        dialog.show(getSupportFragmentManager());
+    }
+
+    public void selectTriggerMode(View view) {
+        if (isWindowLocked())
             return;
-        }
+        BottomDialog dialog = new BottomDialog();
+        dialog.setDatas(mTriggerModeValues, mTriggerModeSelected);
+        dialog.setListener(value -> {
+            mTriggerModeSelected = value;
+            tvTriggerMode.setText(mTriggerModeValues.get(value));
+            savedParamsError = false;
+            showSyncingProgressDialog();
+            LoRaLW004MokoSupport.getInstance().sendOrder(OrderTaskAssembler.setAlarmAlertTriggerMode(mTriggerModeSelected));
+        });
+        dialog.show(getSupportFragmentManager());
+    }
+
+    public void onChangeAlertOnStart(View view) {
+        if (isWindowLocked())
+            return;
+        mAlertOnStartEnable = !mAlertOnStartEnable;
         savedParamsError = false;
         showSyncingProgressDialog();
         List<OrderTask> orderTasks = new ArrayList<>();
-        orderTasks.add(OrderTaskAssembler.setActiveStateEnable(cbActiveStateCount.isChecked() ? 1 : 0));
-        orderTasks.add(OrderTaskAssembler.setActiveStateTimeout(timeout));
+        orderTasks.add(OrderTaskAssembler.setAlarmAlertStartEventNotifyEnable(mAlertOnStartEnable ? 1 : 0));
+        orderTasks.add(OrderTaskAssembler.getAlarmAlertStartEventNotifyEnable());
+        LoRaLW004MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
+    }
+
+    public void onChangeAlertOnEnd(View view) {
+        if (isWindowLocked())
+            return;
+        mAlertOnEndEnable = !mAlertOnEndEnable;
+        savedParamsError = false;
+        showSyncingProgressDialog();
+        List<OrderTask> orderTasks = new ArrayList<>();
+        orderTasks.add(OrderTaskAssembler.setAlarmAlertEndEventNotifyEnable(mAlertOnEndEnable ? 1 : 0));
+        orderTasks.add(OrderTaskAssembler.getAlarmAlertEndEventNotifyEnable());
         LoRaLW004MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
     }
 }

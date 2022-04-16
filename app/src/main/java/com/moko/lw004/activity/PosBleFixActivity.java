@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.moko.ble.lib.MokoConstants;
@@ -17,7 +18,6 @@ import com.moko.ble.lib.event.ConnectStatusEvent;
 import com.moko.ble.lib.event.OrderTaskResponseEvent;
 import com.moko.ble.lib.task.OrderTask;
 import com.moko.ble.lib.task.OrderTaskResponse;
-import com.moko.lw004.AppConstants;
 import com.moko.lw004.R;
 import com.moko.lw004.R2;
 import com.moko.lw004.dialog.AlertMessageDialog;
@@ -36,39 +36,45 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.util.ArrayList;
 import java.util.List;
 
-import androidx.annotation.Nullable;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class PosBleFixActivity extends BaseActivity {
+public class PosBleFixActivity extends BaseActivity implements SeekBar.OnSeekBarChangeListener{
 
 
     @BindView(R2.id.et_pos_timeout)
     EditText etPosTimeout;
     @BindView(R2.id.et_mac_number)
     EditText etMacNumber;
-    @BindView(R2.id.tv_condition_a)
-    TextView tvConditionA;
-    @BindView(R2.id.tv_condition_b)
-    TextView tvConditionB;
-    @BindView(R2.id.tv_relation)
-    TextView tvRelation;
+    @BindView(R2.id.sb_rssi_filter)
+    SeekBar sbRssiFilter;
+    @BindView(R2.id.tv_rssi_filter_value)
+    TextView tvRssiFilterValue;
+    @BindView(R2.id.tv_rssi_filter_tips)
+    TextView tvRssiFilterTips;
+    @BindView(R2.id.tv_filter_relationship)
+    TextView tvFilterRelationship;
     private boolean mReceiverTag = false;
     private boolean savedParamsError;
-    private boolean isFilterAEnable;
-    private boolean isFilterBEnable;
-    private ArrayList<String> mValues;
-    private int mSelected;
+    private ArrayList<String> mRelationshipValues;
+    private int mRelationshipSelected;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.lw004_activity_pos_ble);
         ButterKnife.bind(this);
-        mValues = new ArrayList<>();
-        mValues.add("Or");
-        mValues.add("And");
         EventBus.getDefault().register(this);
+
+        mRelationshipValues = new ArrayList<>();
+        mRelationshipValues.add("Null");
+        mRelationshipValues.add("Only MAC");
+        mRelationshipValues.add("Only ADV Name");
+        mRelationshipValues.add("Only Raw Data");
+        mRelationshipValues.add("ADV Name&Raw Data");
+        mRelationshipValues.add("MAC&ADV Name&Raw Data");
+        mRelationshipValues.add("ADV Name | Raw Data");
+        sbRssiFilter.setOnSeekBarChangeListener(this);
         // 注册广播接收器
         IntentFilter filter = new IntentFilter();
         filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
@@ -78,9 +84,8 @@ public class PosBleFixActivity extends BaseActivity {
         List<OrderTask> orderTasks = new ArrayList<>();
         orderTasks.add(OrderTaskAssembler.getBlePosTimeout());
         orderTasks.add(OrderTaskAssembler.getBlePosNumber());
-        orderTasks.add(OrderTaskAssembler.getFilterSwitchA());
-        orderTasks.add(OrderTaskAssembler.getFilterSwitchB());
-        orderTasks.add(OrderTaskAssembler.getFilterABRelation());
+        orderTasks.add(OrderTaskAssembler.getFilterRSSI());
+        orderTasks.add(OrderTaskAssembler.getFilterRelationship());
         LoRaLW004MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
     }
 
@@ -128,12 +133,12 @@ public class PosBleFixActivity extends BaseActivity {
                                 int result = value[4] & 0xFF;
                                 switch (configKeyEnum) {
                                     case KEY_BLE_POS_TIMEOUT:
-                                    case KEY_FILTER_A_B_RELATION:
+                                    case KEY_BLE_POS_MAC_NUMBER:
                                         if (result != 1) {
                                             savedParamsError = true;
                                         }
                                         break;
-                                    case KEY_BLE_POS_MAC_NUMBER:
+                                    case KEY_FILTER_RELATIONSHIP:
                                         if (result != 1) {
                                             savedParamsError = true;
                                         }
@@ -164,30 +169,19 @@ public class PosBleFixActivity extends BaseActivity {
                                             etMacNumber.setText(String.valueOf(number));
                                         }
                                         break;
-                                    case KEY_FILTER_SWITCH_A:
+                                    case KEY_FILTER_RSSI:
                                         if (length > 0) {
-                                            int enable = value[4] & 0xFF;
-                                            tvConditionA.setText(enable == 0 ? "OFF" : "ON");
-                                            isFilterAEnable = enable == 1;
+                                            final int rssi = value[4];
+                                            int progress = rssi + 127;
+                                            sbRssiFilter.setProgress(progress);
+                                            tvRssiFilterTips.setText(getString(R.string.rssi_filter, rssi));
                                         }
                                         break;
-                                    case KEY_FILTER_SWITCH_B:
+                                    case KEY_FILTER_RELATIONSHIP:
                                         if (length > 0) {
-                                            int enable = value[4] & 0xFF;
-                                            tvConditionB.setText(enable == 0 ? "OFF" : "ON");
-                                            isFilterBEnable = enable == 1;
-                                            if (isFilterAEnable && isFilterBEnable) {
-                                                tvRelation.setEnabled(true);
-                                            } else {
-                                                tvRelation.setEnabled(false);
-                                            }
-                                        }
-                                        break;
-                                    case KEY_FILTER_A_B_RELATION:
-                                        if (length == 1) {
-                                            final int relation = value[4] & 0xFF;
-                                            tvRelation.setText(relation == 1 ? "And" : "Or");
-                                            mSelected = relation;
+                                            int relationship = value[4] & 0xFF;
+                                            mRelationshipSelected = relationship;
+                                            tvFilterRelationship.setText(mRelationshipValues.get(relationship));
                                         }
                                         break;
                                 }
@@ -206,7 +200,7 @@ public class PosBleFixActivity extends BaseActivity {
             showSyncingProgressDialog();
             saveParams();
         } else {
-            ToastUtils.showToast(this, "Opps！Save failed. Please check the input characters and try again.");
+            ToastUtils.showToast(this, "Para error!");
         }
     }
 
@@ -238,10 +232,9 @@ public class PosBleFixActivity extends BaseActivity {
         savedParamsError = false;
         List<OrderTask> orderTasks = new ArrayList<>();
         orderTasks.add(OrderTaskAssembler.setBlePosTimeout(posTimeout));
-        if (isFilterAEnable && isFilterBEnable) {
-            orderTasks.add(OrderTaskAssembler.setFilterABRelation(mSelected));
-        }
         orderTasks.add(OrderTaskAssembler.setBlePosNumber(number));
+        orderTasks.add(OrderTaskAssembler.setFilterRSSI(sbRssiFilter.getProgress() - 127));
+        orderTasks.add(OrderTaskAssembler.setFilterRelationship(mRelationshipSelected));
         LoRaLW004MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
     }
 
@@ -306,42 +299,53 @@ public class PosBleFixActivity extends BaseActivity {
         finish();
     }
 
-    public void onRelation(View view) {
+    public void onFilterRelationship(View view) {
         if (isWindowLocked())
             return;
         BottomDialog dialog = new BottomDialog();
-        dialog.setDatas(mValues, mSelected);
+        dialog.setDatas(mRelationshipValues, mRelationshipSelected);
         dialog.setListener(value -> {
-            tvRelation.setText(value == 1 ? "And" : "Or");
-            mSelected = value;
+            mRelationshipSelected = value;
+            tvFilterRelationship.setText(mRelationshipValues.get(value));
         });
         dialog.show(getSupportFragmentManager());
     }
 
-    public void onFilterA(View view) {
+    public void onFilterByMac(View view) {
         if (isWindowLocked())
             return;
-        startActivityForResult(new Intent(this, FilterOptionsAActivity.class), AppConstants.REQUEST_CODE_FILTER);
+        Intent intent = new Intent(this, FilterMacAddressActivity.class);
+        startActivity(intent);
     }
 
-    public void onFilterB(View view) {
+    public void onFilterByName(View view) {
         if (isWindowLocked())
             return;
-        startActivityForResult(new Intent(this, FilterOptionsBActivity.class), AppConstants.REQUEST_CODE_FILTER);
+        Intent intent = new Intent(this, FilterAdvNameActivity.class);
+        startActivity(intent);
+    }
+
+    public void onFilterByRawData(View view) {
+        if (isWindowLocked())
+            return;
+        Intent intent = new Intent(this, FilterRawDataSwitchActivity.class);
+        startActivity(intent);
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == AppConstants.REQUEST_CODE_FILTER) {
-            tvRelation.postDelayed(() -> {
-                showSyncingProgressDialog();
-                List<OrderTask> orderTasks = new ArrayList<>();
-                orderTasks.add(OrderTaskAssembler.getFilterSwitchA());
-                orderTasks.add(OrderTaskAssembler.getFilterSwitchB());
-                orderTasks.add(OrderTaskAssembler.getFilterABRelation());
-                LoRaLW004MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
-            }, 500);
-        }
+    public void onProgressChanged(SeekBar seekBar, int progress, boolean b) {
+        int rssi = progress - 127;
+        tvRssiFilterValue.setText(String.format("%ddBm", rssi));
+        tvRssiFilterTips.setText(getString(R.string.rssi_filter, rssi));
+    }
+
+    @Override
+    public void onStartTrackingTouch(SeekBar seekBar) {
+
+    }
+
+    @Override
+    public void onStopTrackingTouch(SeekBar seekBar) {
+
     }
 }

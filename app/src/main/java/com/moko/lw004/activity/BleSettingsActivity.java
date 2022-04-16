@@ -1,18 +1,13 @@
 package com.moko.lw004.activity;
 
 
-import android.bluetooth.BluetoothAdapter;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
+import android.text.InputFilter;
 import android.text.TextUtils;
 import android.view.View;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.moko.ble.lib.MokoConstants;
@@ -23,8 +18,9 @@ import com.moko.ble.lib.task.OrderTaskResponse;
 import com.moko.lw004.R;
 import com.moko.lw004.R2;
 import com.moko.lw004.dialog.AlertMessageDialog;
-import com.moko.lw004.dialog.BottomDialog;
+import com.moko.lw004.dialog.ChangePasswordDialog;
 import com.moko.lw004.dialog.LoadingMessageDialog;
+import com.moko.lw004.entity.TxPowerEnum;
 import com.moko.lw004.utils.ToastUtils;
 import com.moko.support.lw004.LoRaLW004MokoSupport;
 import com.moko.support.lw004.OrderTaskAssembler;
@@ -36,59 +32,57 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
-import androidx.constraintlayout.widget.ConstraintLayout;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class BleSettingsActivity extends BaseActivity implements CompoundButton.OnCheckedChangeListener {
+public class BleSettingsActivity extends BaseActivity implements SeekBar.OnSeekBarChangeListener {
+    private final String FILTER_ASCII = "[ -~]*";
 
-    @BindView(R2.id.cb_beacon_mode)
-    CheckBox cbBeaconMode;
-    @BindView(R2.id.iv_connectable)
-    ImageView ivConnectable;
+    @BindView(R2.id.et_adv_name)
+    EditText etAdvName;
     @BindView(R2.id.et_adv_interval)
     EditText etAdvInterval;
-    @BindView(R2.id.cl_beacon_mode_open)
-    ConstraintLayout clBeaconModeOpen;
     @BindView(R2.id.et_adv_timeout)
     EditText etAdvTimeout;
-    @BindView(R2.id.cl_beacon_mode_close)
-    ConstraintLayout clBeaconModeClose;
-    @BindView(R2.id.tv_scan_type)
-    TextView tvScanType;
-    private boolean mReceiverTag = false;
+    @BindView(R2.id.iv_login_mode)
+    ImageView ivLoginMode;
+    @BindView(R2.id.sb_tx_power)
+    SeekBar sbTxPower;
+    @BindView(R2.id.tv_tx_power_value)
+    TextView tvTxPowerValue;
+    @BindView(R2.id.tv_change_password)
+    TextView tvChangePassword;
     private boolean savedParamsError;
-    private ArrayList<String> mValues;
-    private int mSelected;
-    private int mShowSelected;
-    private boolean mConnectableEnable;
+    private boolean mPasswordVerifyEnable;
+    private boolean mPasswordVerifyDisable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.lw004_activity_ble_settings);
         ButterKnife.bind(this);
-        mValues = new ArrayList<>();
-        mValues.add("1M PHY(BLE 4.x)");
-        mValues.add("1M PHY(BLE 5)");
-        mValues.add("1M PHY(BLE 4.x+BLE 5)");
-        mValues.add("Coded PHY(BLE 5)");
-        cbBeaconMode.setOnCheckedChangeListener(this);
         EventBus.getDefault().register(this);
-        // 注册广播接收器
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
-        registerReceiver(mReceiver, filter);
-        mReceiverTag = true;
+        InputFilter inputFilter = (source, start, end, dest, dstart, dend) -> {
+            if (!(source + "").matches(FILTER_ASCII)) {
+                return "";
+            }
+
+            return null;
+        };
+        etAdvName.setFilters(new InputFilter[]{new InputFilter.LengthFilter(16), inputFilter});
+        sbTxPower.setOnSeekBarChangeListener(this);
         showSyncingProgressDialog();
         List<OrderTask> orderTasks = new ArrayList<>();
-        orderTasks.add(OrderTaskAssembler.getBeaconEnable());
-        orderTasks.add(OrderTaskAssembler.getConnectable());
+        orderTasks.add(OrderTaskAssembler.getAdvName());
         orderTasks.add(OrderTaskAssembler.getAdvInterval());
         orderTasks.add(OrderTaskAssembler.getAdvTimeout());
-        orderTasks.add(OrderTaskAssembler.getScanType());
+        orderTasks.add(OrderTaskAssembler.getPasswordVerifyEnable());
+        orderTasks.add(OrderTaskAssembler.getAdvTxPower());
         LoRaLW004MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
     }
 
@@ -135,15 +129,15 @@ public class BleSettingsActivity extends BaseActivity implements CompoundButton.
                                 // write
                                 int result = value[4] & 0xFF;
                                 switch (configKeyEnum) {
-                                    case KEY_BEACON_ENABLE:
-                                    case KEY_CONNECTABLE:
+                                    case KEY_ADV_NAME:
                                     case KEY_ADV_INTERVAL:
                                     case KEY_ADV_TIMEOUT:
+                                    case KEY_ADV_TX_POWER:
                                         if (result != 1) {
                                             savedParamsError = true;
                                         }
                                         break;
-                                    case KEY_SCAN_TYPE:
+                                    case KEY_PASSWORD_VERIFY_ENABLE:
                                         if (result != 1) {
                                             savedParamsError = true;
                                         }
@@ -162,24 +156,9 @@ public class BleSettingsActivity extends BaseActivity implements CompoundButton.
                             if (flag == 0x00) {
                                 // read
                                 switch (configKeyEnum) {
-                                    case KEY_BEACON_ENABLE:
+                                    case KEY_ADV_NAME:
                                         if (length > 0) {
-                                            int enable = value[4] & 0xFF;
-                                            cbBeaconMode.setChecked(enable == 1);
-                                            if (cbBeaconMode.isChecked()) {
-                                                clBeaconModeOpen.setVisibility(View.VISIBLE);
-                                                clBeaconModeClose.setVisibility(View.GONE);
-                                            } else {
-                                                clBeaconModeOpen.setVisibility(View.GONE);
-                                                clBeaconModeClose.setVisibility(View.VISIBLE);
-                                            }
-                                        }
-                                        break;
-                                    case KEY_CONNECTABLE:
-                                        if (length > 0) {
-                                            int enable = value[4] & 0xFF;
-                                            mConnectableEnable = enable == 1;
-                                            ivConnectable.setImageResource(mConnectableEnable ? R.drawable.lw004_ic_checked : R.drawable.lw004_ic_unchecked);
+                                            etAdvName.setText(new String(Arrays.copyOfRange(value, 4, 4 + length)));
                                         }
                                         break;
                                     case KEY_ADV_INTERVAL:
@@ -194,20 +173,21 @@ public class BleSettingsActivity extends BaseActivity implements CompoundButton.
                                             etAdvTimeout.setText(String.valueOf(timeout));
                                         }
                                         break;
-                                    case KEY_SCAN_TYPE:
+                                    case KEY_PASSWORD_VERIFY_ENABLE:
                                         if (length > 0) {
-                                            int type = value[4] & 0xFF;
-                                            mSelected = type;
-                                            if (type == 0) {
-                                                mShowSelected = 0;
-                                            } else if (type == 1) {
-                                                mShowSelected = 1;
-                                            } else if (type == 2) {
-                                                mShowSelected = 3;
-                                            } else if (type == 3) {
-                                                mShowSelected = 2;
-                                            }
-                                            tvScanType.setText(mValues.get(mShowSelected));
+                                            int enable = value[4] & 0xFF;
+                                            mPasswordVerifyEnable = enable == 1;
+                                            mPasswordVerifyDisable = enable == 0;
+                                            ivLoginMode.setImageResource(mPasswordVerifyEnable ? R.drawable.lw004_ic_checked : R.drawable.lw004_ic_unchecked);
+                                            tvChangePassword.setVisibility(mPasswordVerifyEnable ? View.VISIBLE : View.GONE);
+                                        }
+                                        break;
+                                    case KEY_ADV_TX_POWER:
+                                        if (length > 0) {
+                                            int txPower = value[4];
+                                            int progress = TxPowerEnum.fromTxPower(txPower).ordinal();
+                                            sbTxPower.setProgress(progress);
+                                            tvTxPowerValue.setText(String.format("%ddBm", txPower));
                                         }
                                         break;
                                 }
@@ -219,35 +199,9 @@ public class BleSettingsActivity extends BaseActivity implements CompoundButton.
         });
     }
 
-
-    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-
-            if (intent != null) {
-                String action = intent.getAction();
-                if (BluetoothAdapter.ACTION_STATE_CHANGED.equals(action)) {
-                    int blueState = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, 0);
-                    switch (blueState) {
-                        case BluetoothAdapter.STATE_TURNING_OFF:
-                            dismissSyncProgressDialog();
-                            finish();
-                            break;
-                    }
-                }
-            }
-        }
-    };
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (mReceiverTag) {
-            mReceiverTag = false;
-            // 注销广播
-            unregisterReceiver(mReceiver);
-        }
         EventBus.getDefault().unregister(this);
     }
 
@@ -280,27 +234,6 @@ public class BleSettingsActivity extends BaseActivity implements CompoundButton.
         finish();
     }
 
-    public void selectScanType(View view) {
-        if (isWindowLocked())
-            return;
-        BottomDialog dialog = new BottomDialog();
-        dialog.setDatas(mValues, mShowSelected);
-        dialog.setListener(value -> {
-            mShowSelected = value;
-            if (value == 0) {
-                mSelected = 0;
-            } else if (value == 1) {
-                mSelected = 1;
-            } else if (value == 2) {
-                mSelected = 3;
-            } else if (value == 3) {
-                mSelected = 2;
-            }
-            tvScanType.setText(mValues.get(value));
-        });
-        dialog.show(getSupportFragmentManager());
-    }
-
     public void onSave(View view) {
         if (isWindowLocked())
             return;
@@ -308,88 +241,94 @@ public class BleSettingsActivity extends BaseActivity implements CompoundButton.
             showSyncingProgressDialog();
             saveParams();
         } else {
-            ToastUtils.showToast(this, "Opps！Save failed. Please check the input characters and try again.");
+            ToastUtils.showToast(this, "Para error!");
         }
     }
 
     private boolean isValid() {
-        if (cbBeaconMode.isChecked()) {
-            final String intervalStr = etAdvInterval.getText().toString();
-            if (TextUtils.isEmpty(intervalStr))
-                return false;
-            final int interval = Integer.parseInt(intervalStr);
-            if (interval < 1 || interval > 100) {
-                return false;
-            }
-        } else {
-            final String timeoutStr = etAdvTimeout.getText().toString();
-            if (TextUtils.isEmpty(timeoutStr))
-                return false;
-            final int timeout = Integer.parseInt(timeoutStr);
-            if (timeout < 1 || timeout > 60) {
-                return false;
-            }
+        final String advIntervalStr = etAdvInterval.getText().toString();
+        if (TextUtils.isEmpty(advIntervalStr))
+            return false;
+        final int interval = Integer.parseInt(advIntervalStr);
+        if (interval < 1 || interval > 100) {
+            return false;
+        }
+        final String advTimeoutStr = etAdvTimeout.getText().toString();
+        if (TextUtils.isEmpty(advTimeoutStr))
+            return false;
+        final int timeout = Integer.parseInt(advTimeoutStr);
+        if (timeout < 1 || timeout > 60) {
+            return false;
         }
         return true;
-
     }
 
 
     private void saveParams() {
+        final String advName = etAdvName.getText().toString();
         final String intervalStr = etAdvInterval.getText().toString();
         final String timeoutStr = etAdvTimeout.getText().toString();
         final int interval = Integer.parseInt(intervalStr);
         final int timeout = Integer.parseInt(timeoutStr);
+        final int progress = sbTxPower.getProgress();
+        TxPowerEnum txPowerEnum = TxPowerEnum.fromOrdinal(progress);
         savedParamsError = false;
         List<OrderTask> orderTasks = new ArrayList<>();
-        orderTasks.add(OrderTaskAssembler.setBeaconEnable(cbBeaconMode.isChecked() ? 1 : 0));
-        if (cbBeaconMode.isChecked()) {
-            orderTasks.add(OrderTaskAssembler.setConnectable(mConnectableEnable ? 1 : 0));
-            orderTasks.add(OrderTaskAssembler.setAdvInterval(interval));
-        } else {
-            orderTasks.add(OrderTaskAssembler.setAdvTimeout(timeout));
+        orderTasks.add(OrderTaskAssembler.setAdvName(advName));
+        orderTasks.add(OrderTaskAssembler.setAdvInterval(interval));
+        orderTasks.add(OrderTaskAssembler.setAdvTimeout(timeout));
+        if (txPowerEnum != null) {
+            orderTasks.add(OrderTaskAssembler.setAdvTxPower(txPowerEnum.getTxPower()));
         }
-        orderTasks.add(OrderTaskAssembler.setScanType(mSelected));
+        orderTasks.add(OrderTaskAssembler.setPasswordVerifyEnable(mPasswordVerifyEnable ? 1 : 0));
         LoRaLW004MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
     }
 
-    @Override
-    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        if (isChecked) {
-            clBeaconModeOpen.setVisibility(View.VISIBLE);
-            clBeaconModeClose.setVisibility(View.GONE);
-        } else {
-            clBeaconModeOpen.setVisibility(View.GONE);
-            clBeaconModeClose.setVisibility(View.VISIBLE);
-        }
-    }
-
-    public void onAdvContent(View view) {
+    public void onChangePassword(View view) {
         if (isWindowLocked())
             return;
-        startActivity(new Intent(this, AdvInfoActivity.class));
+        if (mPasswordVerifyDisable)
+            return;
+        final ChangePasswordDialog dialog = new ChangePasswordDialog(this);
+        dialog.setOnPasswordClicked(password -> {
+            showSyncingProgressDialog();
+            LoRaLW004MokoSupport.getInstance().sendOrder(OrderTaskAssembler.changePassword(password));
+        });
+        dialog.show();
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+
+            public void run() {
+                runOnUiThread(() -> dialog.showKeyboard());
+            }
+        }, 200);
     }
 
-    public void onConnectable(View view) {
-        if (mConnectableEnable) {
-            AlertMessageDialog dialog = new AlertMessageDialog();
-            dialog.setTitle("Warning!");
-            dialog.setMessage("Are you sure to make the device unconnectable？");
-            dialog.setOnAlertConfirmListener(() -> {
-                mConnectableEnable = false;
-                ivConnectable.setImageResource(mConnectableEnable ? R.drawable.lw004_ic_checked : R.drawable.lw004_ic_unchecked);
+    public void onChangeLoginMode(View view) {
+        if (isWindowLocked())
+            return;
+        mPasswordVerifyEnable = !mPasswordVerifyEnable;
+        ivLoginMode.setImageResource(mPasswordVerifyEnable ? R.drawable.lw004_ic_checked : R.drawable.lw004_ic_unchecked);
+        tvChangePassword.setVisibility(mPasswordVerifyEnable ? View.VISIBLE : View.GONE);
+    }
 
-            });
-            dialog.show(getSupportFragmentManager());
-        } else {
-            AlertMessageDialog dialog = new AlertMessageDialog();
-            dialog.setTitle("Warning!");
-            dialog.setMessage("Are you sure to make the device connectable？");
-            dialog.setOnAlertConfirmListener(() -> {
-                mConnectableEnable = true;
-                ivConnectable.setImageResource(mConnectableEnable ? R.drawable.lw004_ic_checked : R.drawable.lw004_ic_unchecked);
-            });
-            dialog.show(getSupportFragmentManager());
-        }
+    @Override
+    public void onProgressChanged(SeekBar seekBar, int progress, boolean b) {
+        TxPowerEnum txPowerEnum = TxPowerEnum.fromOrdinal(progress);
+        if (txPowerEnum == null)
+            return;
+        int txPower = txPowerEnum.getTxPower();
+        tvTxPowerValue.setText(String.format("%ddBm", txPower));
+    }
+
+    @Override
+    public void onStartTrackingTouch(SeekBar seekBar) {
+
+    }
+
+    @Override
+    public void onStopTrackingTouch(SeekBar seekBar) {
+
     }
 }

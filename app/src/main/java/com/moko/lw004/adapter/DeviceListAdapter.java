@@ -4,6 +4,7 @@ import android.text.TextUtils;
 
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
+import com.moko.ble.lib.utils.MokoUtils;
 import com.moko.lw004.R;
 import com.moko.lw004.entity.AdvInfo;
 
@@ -20,15 +21,13 @@ public class DeviceListAdapter extends BaseQuickAdapter<AdvInfo, BaseViewHolder>
         helper.setText(R.id.tv_name, name);
         helper.setText(R.id.tv_mac, String.format("MAC:%s", item.mac));
 
-        helper.setText(R.id.tv_power_state, item.powerState == 1 ? "Low" : "Full");
         final String intervalTime = item.intervalTime == 0 ? "<->N/A" : String.format("<->%dms", item.intervalTime);
         helper.setText(R.id.tv_track_interval, intervalTime);
+        helper.setText(R.id.tv_battery, String.format("%d%%", item.battery));
         helper.setText(R.id.tv_tx_power, String.format("Tx Power:%ddBm", item.txPower));
-        helper.setText(R.id.tv_uuid_value, item.uuid);
-        helper.setText(R.id.tv_major_value, String.valueOf(item.major));
-        helper.setText(R.id.tv_minor_value, String.valueOf(item.minor));
-        helper.setText(R.id.tv_measure_power_value, String.format("%ddBm", item.measurePower));
+        helper.setText(R.id.tv_voltage, String.format("%s V", MokoUtils.getDecimalFormat("0.###").format(item.voltage * 0.001)));
         helper.setVisible(R.id.tv_connect, item.connectable);
         helper.addOnClickListener(R.id.tv_connect);
+
     }
 }

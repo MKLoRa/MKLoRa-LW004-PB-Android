@@ -44,7 +44,6 @@ public class DownlinkForPosActivity extends BaseActivity {
     private boolean savedParamsError;
     private ArrayList<String> mValues;
     private int mSelected;
-    private int mShowSelected;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,13 +51,9 @@ public class DownlinkForPosActivity extends BaseActivity {
         setContentView(R.layout.lw004_activity_downlink_for_pos);
         ButterKnife.bind(this);
         mValues = new ArrayList<>();
-        mValues.add("WIFI");
         mValues.add("BLE");
         mValues.add("GPS");
-        mValues.add("WIFI+GPS");
-        mValues.add("BLE+GPS");
-        mValues.add("WIFI+BLE");
-        mValues.add("WIFI+BLE+GPS");
+        mValues.add("BLE&GPS");
         EventBus.getDefault().register(this);
         // 注册广播接收器
         IntentFilter filter = new IntentFilter();
@@ -137,22 +132,7 @@ public class DownlinkForPosActivity extends BaseActivity {
                                         if (length > 0) {
                                             int strategy = value[4] & 0xFF;
                                             mSelected = strategy;
-                                            if (strategy == 1) {
-                                                mShowSelected = 0;
-                                            } else if (strategy == 2) {
-                                                mShowSelected = 1;
-                                            } else if (strategy == 3) {
-                                                mShowSelected = 5;
-                                            } else if (strategy == 4) {
-                                                mShowSelected = 2;
-                                            } else if (strategy == 5) {
-                                                mShowSelected = 3;
-                                            } else if (strategy == 6) {
-                                                mShowSelected = 4;
-                                            } else if (strategy == 7) {
-                                                mShowSelected = 6;
-                                            }
-                                            tvDownlinkPosStrategy.setText(mValues.get(mShowSelected));
+                                            tvDownlinkPosStrategy.setText(mValues.get(mSelected));
                                         }
                                         break;
                                 }
@@ -229,24 +209,9 @@ public class DownlinkForPosActivity extends BaseActivity {
         if (isWindowLocked())
             return;
         BottomDialog dialog = new BottomDialog();
-        dialog.setDatas(mValues, mShowSelected);
+        dialog.setDatas(mValues, mSelected);
         dialog.setListener(value -> {
-            mShowSelected = value;
-            if (value == 0) {
-                mSelected = 1;
-            } else if (value == 1) {
-                mSelected = 2;
-            } else if (value == 2) {
-                mSelected = 4;
-            } else if (value == 3) {
-                mSelected = 5;
-            } else if (value == 4) {
-                mSelected = 6;
-            } else if (value == 5) {
-                mSelected = 3;
-            } else if (value == 6) {
-                mSelected = 7;
-            }
+            mSelected = value;
             tvDownlinkPosStrategy.setText(mValues.get(value));
             savedParamsError = false;
             showSyncingProgressDialog();
