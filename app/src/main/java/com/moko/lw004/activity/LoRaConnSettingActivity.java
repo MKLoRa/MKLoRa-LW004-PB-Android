@@ -448,7 +448,7 @@ public class LoRaConnSettingActivity extends BaseActivity implements CompoundBut
             mLoadingMessageDialog.dismissAllowingStateLoss();
     }
 
-    public void back(View view) {
+    public void onBack(View view) {
         backHome();
     }
 
@@ -757,7 +757,7 @@ public class LoRaConnSettingActivity extends BaseActivity implements CompoundBut
         String adrAckLimitStr = etAdrAckLimit.getText().toString();
         String adrAckDelayStr = etAdrAckDelay.getText().toString();
         if (TextUtils.isEmpty(adrAckLimitStr)) {
-            ToastUtils.showToast(this, "OPara error!");
+            ToastUtils.showToast(this, "Para error!");
             return;
         }
         int adrAckLimit = Integer.parseInt(adrAckLimitStr);
@@ -782,23 +782,23 @@ public class LoRaConnSettingActivity extends BaseActivity implements CompoundBut
             String appSkey = etAppSkey.getText().toString();
             String nwkSkey = etNwkSkey.getText().toString();
             if (devEui.length() != 16) {
-                ToastUtils.showToast(this, "data length error");
+                ToastUtils.showToast(this, "Para error!");
                 return;
             }
             if (appEui.length() != 16) {
-                ToastUtils.showToast(this, "data length error");
+                ToastUtils.showToast(this, "Para error!");
                 return;
             }
             if (devAddr.length() != 8) {
-                ToastUtils.showToast(this, "data length error");
+                ToastUtils.showToast(this, "Para error!");
                 return;
             }
             if (appSkey.length() != 32) {
-                ToastUtils.showToast(this, "data length error");
+                ToastUtils.showToast(this, "Para error!");
                 return;
             }
             if (nwkSkey.length() != 32) {
-                ToastUtils.showToast(this, "data length error");
+                ToastUtils.showToast(this, "Para error!");
                 return;
             }
             orderTasks.add(OrderTaskAssembler.setLoraDevEUI(devEui));
@@ -811,15 +811,15 @@ public class LoRaConnSettingActivity extends BaseActivity implements CompoundBut
             String appEui = etAppEui.getText().toString();
             String appKey = etAppKey.getText().toString();
             if (devEui.length() != 16) {
-                ToastUtils.showToast(this, "data length error");
+                ToastUtils.showToast(this, "Para error!");
                 return;
             }
             if (appEui.length() != 16) {
-                ToastUtils.showToast(this, "data length error");
+                ToastUtils.showToast(this, "Para error!");
                 return;
             }
             if (appKey.length() != 32) {
-                ToastUtils.showToast(this, "data length error");
+                ToastUtils.showToast(this, "Para error!");
                 return;
             }
             orderTasks.add(OrderTaskAssembler.setLoraDevEUI(devEui));

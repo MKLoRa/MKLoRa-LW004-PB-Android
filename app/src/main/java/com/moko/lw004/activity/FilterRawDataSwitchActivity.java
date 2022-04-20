@@ -15,7 +15,6 @@ import com.moko.ble.lib.task.OrderTaskResponse;
 import com.moko.lw004.AppConstants;
 import com.moko.lw004.R;
 import com.moko.lw004.R2;
-import com.moko.lw004.dialog.AlertMessageDialog;
 import com.moko.lw004.dialog.LoadingMessageDialog;
 import com.moko.lw004.utils.ToastUtils;
 import com.moko.support.lw004.LoRaLW004MokoSupport;
@@ -123,11 +122,7 @@ public class FilterRawDataSwitchActivity extends BaseActivity {
                                         if (savedParamsError) {
                                             ToastUtils.showToast(FilterRawDataSwitchActivity.this, "Opps！Save failed. Please check the input characters and try again.");
                                         } else {
-                                            AlertMessageDialog dialog = new AlertMessageDialog();
-                                            dialog.setMessage("Saved Successfully！");
-                                            dialog.setConfirm("OK");
-                                            dialog.setCancelGone();
-                                            dialog.show(getSupportFragmentManager());
+                                            ToastUtils.showToast(this, "Saved Successfully！");
                                         }
                                         break;
                                 }
@@ -276,7 +271,7 @@ public class FilterRawDataSwitchActivity extends BaseActivity {
                 List<OrderTask> orderTasks = new ArrayList<>();
                 orderTasks.add(OrderTaskAssembler.getFilterRawData());
                 LoRaLW004MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
-            }, 500);
+            }, 1000);
         }
     }
 }

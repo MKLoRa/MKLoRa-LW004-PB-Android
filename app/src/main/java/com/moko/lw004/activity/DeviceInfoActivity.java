@@ -245,11 +245,7 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
                                         if (savedParamsError) {
                                             ToastUtils.showToast(DeviceInfoActivity.this, "Opps！Save failed. Please check the input characters and try again.");
                                         } else {
-                                            AlertMessageDialog dialog = new AlertMessageDialog();
-                                            dialog.setMessage("Saved Successfully！");
-                                            dialog.setConfirm("OK");
-                                            dialog.setCancelGone();
-                                            dialog.show(getSupportFragmentManager());
+                                            ToastUtils.showToast(this, "Saved Successfully！");
                                         }
                                         break;
                                 }
@@ -426,15 +422,15 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == AppConstants.REQUEST_CODE_LORA_CONN_SETTING) {
             if (resultCode == RESULT_OK) {
+                showSyncingProgressDialog();
                 ivSave.postDelayed(() -> {
-                    showSyncingProgressDialog();
                     List<OrderTask> orderTasks = new ArrayList<>();
                     // setting
                     orderTasks.add(OrderTaskAssembler.getLoraRegion());
                     orderTasks.add(OrderTaskAssembler.getLoraUploadMode());
                     orderTasks.add(OrderTaskAssembler.getLoraNetworkStatus());
                     LoRaLW004MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
-                }, 500);
+                }, 1000);
             }
         }
         if (requestCode == AppConstants.REQUEST_CODE_SYSTEM_INFO) {

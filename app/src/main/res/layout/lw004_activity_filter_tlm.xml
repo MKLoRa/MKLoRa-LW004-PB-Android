@@ -34,17 +34,6 @@
             android:textSize="17sp"
             android:textStyle="bold" />
 
-        <ImageView
-            android:id="@+id/iv_save"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_alignParentRight="true"
-            android:clickable="true"
-            android:onClick="onSave"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp"
-            android:src="@drawable/lw004_ic_save" />
-
     </RelativeLayout>
 
     <ScrollView
@@ -63,20 +52,28 @@
             android:focusableInTouchMode="true"
             android:paddingBottom="10dp">
 
-            <CheckBox
-                android:id="@+id/cb_tlm"
+            <TextView
                 android:layout_width="0dp"
-                android:layout_height="50dp"
+                android:layout_height="wrap_content"
                 android:layout_marginLeft="12dp"
-                android:layout_marginRight="12dp"
-                android:button="@null"
-                android:checked="false"
-                android:drawableRight="@drawable/lw004_selector_cb_btn"
+                android:gravity="center_vertical"
                 android:text="Eddystone-TLM"
                 android:textColor="@color/lw004_black_333333"
                 android:textSize="15sp"
                 android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="@id/iv_tlm_enable"
                 app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toTopOf="@id/iv_tlm_enable" />
+
+            <ImageView
+                android:id="@+id/iv_tlm_enable"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:clickable="true"
+                android:onClick="onTLMEnable"
+                android:paddingLeft="12dp"
+                android:paddingRight="12dp"
+                android:src="@drawable/lw004_ic_unchecked"
                 app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
@@ -85,7 +82,7 @@
                 android:layout_width="0dp"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/cb_tlm" />
+                app:layout_constraintTop_toBottomOf="@id/iv_tlm_enable" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -115,7 +112,7 @@
                 android:textColor="@color/lw004_white_ffffff"
                 android:textSize="15sp"
                 app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/cb_tlm" />
+                app:layout_constraintTop_toBottomOf="@id/iv_tlm_enable" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
 </LinearLayout>

@@ -18,7 +18,6 @@ import com.moko.ble.lib.task.OrderTaskResponse;
 import com.moko.ble.lib.utils.MokoUtils;
 import com.moko.lw004.R;
 import com.moko.lw004.R2;
-import com.moko.lw004.dialog.AlertMessageDialog;
 import com.moko.lw004.dialog.LoadingMessageDialog;
 import com.moko.lw004.utils.ToastUtils;
 import com.moko.support.lw004.LoRaLW004MokoSupport;
@@ -122,11 +121,7 @@ public class FilterMacAddressActivity extends BaseActivity {
                                         if (savedParamsError) {
                                             ToastUtils.showToast(FilterMacAddressActivity.this, "Opps！Save failed. Please check the input characters and try again.");
                                         } else {
-                                            AlertMessageDialog dialog = new AlertMessageDialog();
-                                            dialog.setMessage("Saved Successfully！");
-                                            dialog.setConfirm("OK");
-                                            dialog.setCancelGone();
-                                            dialog.show(getSupportFragmentManager());
+                                            ToastUtils.showToast(this, "Saved Successfully！");
                                         }
                                         break;
                                 }
@@ -209,16 +204,10 @@ public class FilterMacAddressActivity extends BaseActivity {
             ToastUtils.showToast(this, "There are currently no filters to delete");
             return;
         }
-        AlertMessageDialog dialog = new AlertMessageDialog();
-        dialog.setTitle("Warning");
-        dialog.setMessage("Please confirm whether to delete it, if yes, the last option will be deleted!");
-        dialog.setOnAlertConfirmListener(() -> {
-            int count = llMacAddress.getChildCount();
-            if (count > 0) {
-                llMacAddress.removeViewAt(count - 1);
-            }
-        });
-        dialog.show(getSupportFragmentManager());
+        int count = llMacAddress.getChildCount();
+        if (count > 0) {
+            llMacAddress.removeViewAt(count - 1);
+        }
     }
 
 
@@ -226,7 +215,7 @@ public class FilterMacAddressActivity extends BaseActivity {
         savedParamsError = false;
         List<OrderTask> orderTasks = new ArrayList<>();
         orderTasks.add(OrderTaskAssembler.setFilterMacPrecise(cbPreciseMatch.isChecked() ? 1 : 0));
-        orderTasks.add(OrderTaskAssembler.setFilterMacReverse(cbReverseFilter.isChecked()? 1 :0));
+        orderTasks.add(OrderTaskAssembler.setFilterMacReverse(cbReverseFilter.isChecked() ? 1 : 0));
         orderTasks.add(OrderTaskAssembler.setFilterMacRules(filterMacAddress));
         LoRaLW004MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
     }

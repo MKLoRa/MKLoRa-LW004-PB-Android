@@ -6,18 +6,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 
-import com.moko.ble.lib.task.OrderTask;
 import com.moko.lw004.R;
-import com.moko.lw004.R2;
 import com.moko.lw004.activity.DeviceInfoActivity;
-import com.moko.support.lw004.LoRaLW004MokoSupport;
-import com.moko.support.lw004.OrderTaskAssembler;
 
-import java.util.ArrayList;
-
-import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class PositionFragment extends Fragment {

@@ -3,7 +3,7 @@ package com.moko.lw004.activity;
 
 import android.os.Bundle;
 import android.view.View;
-import android.widget.CheckBox;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.moko.ble.lib.MokoConstants;
@@ -13,7 +13,6 @@ import com.moko.ble.lib.task.OrderTask;
 import com.moko.ble.lib.task.OrderTaskResponse;
 import com.moko.lw004.R;
 import com.moko.lw004.R2;
-import com.moko.lw004.dialog.AlertMessageDialog;
 import com.moko.lw004.dialog.BottomDialog;
 import com.moko.lw004.dialog.LoadingMessageDialog;
 import com.moko.lw004.utils.ToastUtils;
@@ -34,15 +33,17 @@ import butterknife.ButterKnife;
 
 public class FilterTLMActivity extends BaseActivity {
 
-    @BindView(R2.id.cb_tlm)
-    CheckBox cbTlm;
+
     @BindView(R2.id.tv_tlm_version)
     TextView tvTlmVersion;
+    @BindView(R2.id.iv_tlm_enable)
+    ImageView ivTlmEnable;
 
     private boolean savedParamsError;
 
     private ArrayList<String> mValues;
     private int mSelected;
+    private boolean mTLMEnable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,10 +107,6 @@ public class FilterTLMActivity extends BaseActivity {
                                 int result = value[4] & 0xFF;
                                 switch (configKeyEnum) {
                                     case KEY_FILTER_EDDYSTONE_TLM_VERSION:
-                                        if (result != 1) {
-                                            savedParamsError = true;
-                                        }
-                                        break;
                                     case KEY_FILTER_EDDYSTONE_TLM_ENABLE:
                                         if (result != 1) {
                                             savedParamsError = true;
@@ -117,11 +114,7 @@ public class FilterTLMActivity extends BaseActivity {
                                         if (savedParamsError) {
                                             ToastUtils.showToast(FilterTLMActivity.this, "Opps！Save failed. Please check the input characters and try again.");
                                         } else {
-                                            AlertMessageDialog dialog = new AlertMessageDialog();
-                                            dialog.setMessage("Saved Successfully！");
-                                            dialog.setConfirm("OK");
-                                            dialog.setCancelGone();
-                                            dialog.show(getSupportFragmentManager());
+                                            ToastUtils.showToast(this, "Saved Successfully！");
                                         }
                                         break;
                                 }
@@ -137,8 +130,8 @@ public class FilterTLMActivity extends BaseActivity {
                                         break;
                                     case KEY_FILTER_EDDYSTONE_TLM_ENABLE:
                                         if (length > 0) {
-                                            int enable = value[4] & 0xFF;
-                                            cbTlm.setChecked(enable == 1);
+                                            mTLMEnable = value[4] == 1;
+                                            ivTlmEnable.setImageResource(mTLMEnable ? R.drawable.lw004_ic_checked : R.drawable.lw004_ic_unchecked);
                                         }
                                         break;
                                 }
@@ -149,29 +142,6 @@ public class FilterTLMActivity extends BaseActivity {
             }
         });
     }
-
-    public void onSave(View view) {
-        if (isWindowLocked())
-            return;
-        if (isValid()) {
-            showSyncingProgressDialog();
-            saveParams();
-        }
-    }
-
-    private boolean isValid() {
-        return true;
-    }
-
-
-    private void saveParams() {
-        savedParamsError = false;
-        List<OrderTask> orderTasks = new ArrayList<>();
-        orderTasks.add(OrderTaskAssembler.setFilterEddystoneTlmVersion(mSelected));
-        orderTasks.add(OrderTaskAssembler.setFilterEddystoneTlmEnable(cbTlm.isChecked() ? 1 : 0));
-        LoRaLW004MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
-    }
-
 
     @Override
     protected void onDestroy() {
@@ -217,7 +187,23 @@ public class FilterTLMActivity extends BaseActivity {
         dialog.setListener(value -> {
             mSelected = value;
             tvTlmVersion.setText(mValues.get(mSelected));
+            showSyncingProgressDialog();
+            List<OrderTask> orderTasks = new ArrayList<>();
+            orderTasks.add(OrderTaskAssembler.setFilterEddystoneTlmVersion(mSelected));
+            orderTasks.add(OrderTaskAssembler.getFilterEddystoneTlmVersion());
+            LoRaLW004MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
         });
         dialog.show(getSupportFragmentManager());
+    }
+
+    public void onTLMEnable(View view) {
+        if (isWindowLocked())
+            return;
+        mTLMEnable = !mTLMEnable;
+        showSyncingProgressDialog();
+        List<OrderTask> orderTasks = new ArrayList<>();
+        orderTasks.add(OrderTaskAssembler.setFilterEddystoneTlmEnable(mTLMEnable ? 1 : 0));
+        orderTasks.add(OrderTaskAssembler.getFilterEddystoneTlmEnable());
+        LoRaLW004MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
     }
 }

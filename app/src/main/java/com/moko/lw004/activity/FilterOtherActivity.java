@@ -18,7 +18,6 @@ import com.moko.ble.lib.task.OrderTaskResponse;
 import com.moko.ble.lib.utils.MokoUtils;
 import com.moko.lw004.R;
 import com.moko.lw004.R2;
-import com.moko.lw004.dialog.AlertMessageDialog;
 import com.moko.lw004.dialog.BottomDialog;
 import com.moko.lw004.dialog.LoadingMessageDialog;
 import com.moko.lw004.utils.ToastUtils;
@@ -130,11 +129,7 @@ public class FilterOtherActivity extends BaseActivity {
                                         if (savedParamsError) {
                                             ToastUtils.showToast(FilterOtherActivity.this, "Opps！Save failed. Please check the input characters and try again.");
                                         } else {
-                                            AlertMessageDialog dialog = new AlertMessageDialog();
-                                            dialog.setMessage("Saved Successfully！");
-                                            dialog.setConfirm("OK");
-                                            dialog.setCancelGone();
-                                            dialog.show(getSupportFragmentManager());
+                                            ToastUtils.showToast(this, "Saved Successfully！");
                                         }
                                         break;
                                 }
@@ -159,7 +154,15 @@ public class FilterOtherActivity extends BaseActivity {
                                                 mValues.add("A & B & C");
                                                 mValues.add("(A & B) | C");
                                                 mValues.add("A | B | C");
-                                                mSelected = relationship - 3;
+                                                if (relationship == 3) {
+                                                    mSelected = 2;
+                                                }
+                                                if (relationship == 4) {
+                                                    mSelected = 0;
+                                                }
+                                                if (relationship == 5) {
+                                                    mSelected = 1;
+                                                }
                                             }
                                             tvOtherRelationship.setText(mValues.get(mSelected));
                                         }
@@ -306,7 +309,15 @@ public class FilterOtherActivity extends BaseActivity {
             relationship = mSelected + 1;
         }
         if (filterOther.size() == 3) {
-            relationship = mSelected + 3;
+            if (mSelected == 0) {
+                relationship = 4;
+            }
+            if (mSelected == 1) {
+                relationship = 5;
+            }
+            if (mSelected == 2) {
+                relationship = 3;
+            }
         }
         orderTasks.add(OrderTaskAssembler.setFilterOtherRelationship(relationship));
         orderTasks.add(OrderTaskAssembler.setFilterOtherEnable(cbOther.isChecked() ? 1 : 0));
@@ -359,31 +370,25 @@ public class FilterOtherActivity extends BaseActivity {
             ToastUtils.showToast(this, "There are currently no filters to delete");
             return;
         }
-        AlertMessageDialog dialog = new AlertMessageDialog();
-        dialog.setTitle("Warning");
-        dialog.setMessage("Please confirm whether to delete it, if yes, the last option will be deleted!");
-        dialog.setOnAlertConfirmListener(() -> {
-            int count = llFilterCondition.getChildCount();
-            if (count > 0) {
-                llFilterCondition.removeViewAt(count - 1);
-                mValues = new ArrayList<>();
-                if (count == 1) {
-                    clOtherRelationship.setVisibility(View.GONE);
-                    return;
-                }
-                if (count == 2) {
-                    mValues.add("A");
-                    mSelected = 0;
-                }
-                if (count == 3) {
-                    mValues.add("A & B");
-                    mValues.add("A | B");
-                    mSelected = 1;
-                }
-                tvOtherRelationship.setText(mValues.get(mSelected));
+        int count = llFilterCondition.getChildCount();
+        if (count > 0) {
+            llFilterCondition.removeViewAt(count - 1);
+            mValues = new ArrayList<>();
+            if (count == 1) {
+                clOtherRelationship.setVisibility(View.GONE);
+                return;
             }
-        });
-        dialog.show(getSupportFragmentManager());
+            if (count == 2) {
+                mValues.add("A");
+                mSelected = 0;
+            }
+            if (count == 3) {
+                mValues.add("A & B");
+                mValues.add("A | B");
+                mSelected = 1;
+            }
+            tvOtherRelationship.setText(mValues.get(mSelected));
+        }
     }
 
     @Override

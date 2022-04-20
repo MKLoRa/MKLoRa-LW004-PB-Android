@@ -15,7 +15,6 @@ import com.moko.ble.lib.task.OrderTask;
 import com.moko.ble.lib.task.OrderTaskResponse;
 import com.moko.lw004.R;
 import com.moko.lw004.R2;
-import com.moko.lw004.dialog.AlertMessageDialog;
 import com.moko.lw004.dialog.BottomDialog;
 import com.moko.lw004.dialog.LoadingMessageDialog;
 import com.moko.lw004.utils.ToastUtils;
@@ -118,11 +117,7 @@ public class AlarmFunctionActivity extends BaseActivity {
                                         if (savedParamsError) {
                                             ToastUtils.showToast(AlarmFunctionActivity.this, "Opps！Save failed. Please check the input characters and try again.");
                                         } else {
-                                            AlertMessageDialog dialog = new AlertMessageDialog();
-                                            dialog.setMessage("Saved Successfully！");
-                                            dialog.setConfirm("OK");
-                                            dialog.setCancelGone();
-                                            dialog.show(getSupportFragmentManager());
+                                            ToastUtils.showToast(this, "Saved Successfully！");
                                         }
                                         break;
                                 }

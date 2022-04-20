@@ -17,7 +17,6 @@ import com.moko.ble.lib.task.OrderTask;
 import com.moko.ble.lib.task.OrderTaskResponse;
 import com.moko.lw004.R;
 import com.moko.lw004.R2;
-import com.moko.lw004.dialog.AlertMessageDialog;
 import com.moko.lw004.dialog.ChangePasswordDialog;
 import com.moko.lw004.dialog.LoadingMessageDialog;
 import com.moko.lw004.entity.TxPowerEnum;
@@ -144,11 +143,7 @@ public class BleSettingsActivity extends BaseActivity implements SeekBar.OnSeekB
                                         if (savedParamsError) {
                                             ToastUtils.showToast(BleSettingsActivity.this, "Opps！Save failed. Please check the input characters and try again.");
                                         } else {
-                                            AlertMessageDialog dialog = new AlertMessageDialog();
-                                            dialog.setMessage("Saved Successfully！");
-                                            dialog.setConfirm("OK");
-                                            dialog.setCancelGone();
-                                            dialog.show(getSupportFragmentManager());
+                                            ToastUtils.showToast(this, "Saved Successfully！");
                                         }
                                         break;
                                 }

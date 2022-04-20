@@ -1,34 +1,21 @@
 package com.moko.lw004.activity;
 
 
-import android.bluetooth.BluetoothAdapter;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.ImageView;
 
 import com.moko.ble.lib.MokoConstants;
 import com.moko.ble.lib.event.ConnectStatusEvent;
 import com.moko.ble.lib.event.OrderTaskResponseEvent;
 import com.moko.ble.lib.task.OrderTaskResponse;
 import com.moko.lw004.R;
-import com.moko.lw004.R2;
-import com.moko.lw004.dialog.AlertMessageDialog;
 import com.moko.lw004.dialog.LoadingMessageDialog;
-import com.moko.lw004.utils.ToastUtils;
-import com.moko.support.lw004.LoRaLW004MokoSupport;
-import com.moko.support.lw004.OrderTaskAssembler;
-import com.moko.support.lw004.entity.OrderCHAR;
-import com.moko.support.lw004.entity.ParamsKeyEnum;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class AuxiliaryOperationActivity extends BaseActivity {
