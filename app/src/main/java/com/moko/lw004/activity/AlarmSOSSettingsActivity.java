@@ -64,8 +64,8 @@ public class AlarmSOSSettingsActivity extends BaseActivity {
         mValues.add("GPS");
         mValues.add("BLE&GPS");
         mTriggerModeValues = new ArrayList<>();
-        mTriggerModeValues.add("Single Click");
         mTriggerModeValues.add("Double Click");
+        mTriggerModeValues.add("Triple Click");
         mTriggerModeValues.add("Long press 1s");
         mTriggerModeValues.add("Long press 2s");
         mTriggerModeValues.add("Long press 3s");

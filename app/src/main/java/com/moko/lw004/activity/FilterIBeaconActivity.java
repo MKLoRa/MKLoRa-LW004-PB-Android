@@ -199,7 +199,6 @@ public class FilterIBeaconActivity extends BaseActivity {
         }
         if (!TextUtils.isEmpty(majorMin) && !TextUtils.isEmpty(majorMax)) {
             if (Integer.parseInt(majorMin) > 65535) {
-                ToastUtils.showToast(this, "Para error!");
                 return false;
             }
             if (Integer.parseInt(majorMax) > 65535) {
