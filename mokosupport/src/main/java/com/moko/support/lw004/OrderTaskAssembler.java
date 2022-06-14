@@ -162,6 +162,18 @@ public class OrderTaskAssembler {
         return task;
     }
 
+    public static OrderTask getPCBAStatus() {
+        ParamsReadTask task = new ParamsReadTask();
+        task.setData(ParamsKeyEnum.KEY_PCBA_STATUS);
+        return task;
+    }
+
+    public static OrderTask getSelfTestStatus() {
+        ParamsReadTask task = new ParamsReadTask();
+        task.setData(ParamsKeyEnum.KEY_SELFTEST_STATUS);
+        return task;
+    }
+
     public static OrderTask getShutdownPayloadEnable() {
         ParamsReadTask task = new ParamsReadTask();
         task.setData(ParamsKeyEnum.KEY_SHUTDOWN_PAYLOAD_ENABLE);

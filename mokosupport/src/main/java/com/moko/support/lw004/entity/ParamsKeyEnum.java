@@ -32,6 +32,8 @@ public enum ParamsKeyEnum implements Serializable {
 
     KEY_START_ADV(0x16),
     KEY_MAC(0x17),
+    KEY_PCBA_STATUS(0x1B),
+    KEY_SELFTEST_STATUS(0x1C),
 
     // 关机信息上报开关
     KEY_SHUTDOWN_PAYLOAD_ENABLE(0x20),
