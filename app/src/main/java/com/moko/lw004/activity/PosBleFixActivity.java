@@ -38,7 +38,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class PosBleFixActivity extends BaseActivity implements SeekBar.OnSeekBarChangeListener{
+public class PosBleFixActivity extends BaseActivity implements SeekBar.OnSeekBarChangeListener {
 
 
     @BindView(R2.id.et_pos_timeout)
@@ -80,12 +80,14 @@ public class PosBleFixActivity extends BaseActivity implements SeekBar.OnSeekBar
         registerReceiver(mReceiver, filter);
         mReceiverTag = true;
         showSyncingProgressDialog();
-        List<OrderTask> orderTasks = new ArrayList<>();
-        orderTasks.add(OrderTaskAssembler.getBlePosTimeout());
-        orderTasks.add(OrderTaskAssembler.getBlePosNumber());
-        orderTasks.add(OrderTaskAssembler.getFilterRSSI());
-        orderTasks.add(OrderTaskAssembler.getFilterRelationship());
-        LoRaLW004MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
+        etPosTimeout.postDelayed(() -> {
+            List<OrderTask> orderTasks = new ArrayList<>();
+            orderTasks.add(OrderTaskAssembler.getBlePosTimeout());
+            orderTasks.add(OrderTaskAssembler.getBlePosNumber());
+            orderTasks.add(OrderTaskAssembler.getFilterRSSI());
+            orderTasks.add(OrderTaskAssembler.getFilterRelationship());
+            LoRaLW004MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
+        }, 500);
     }
 
     @Subscribe(threadMode = ThreadMode.POSTING, priority = 200)

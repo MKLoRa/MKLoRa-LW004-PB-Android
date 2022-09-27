@@ -77,14 +77,16 @@ public class ManDownDetectionActivity extends BaseActivity {
         registerReceiver(mReceiver, filter);
         mReceiverTag = true;
         showSyncingProgressDialog();
-        List<OrderTask> orderTasks = new ArrayList<>();
-        orderTasks.add(OrderTaskAssembler.getManDownDetectionEnable());
-        orderTasks.add(OrderTaskAssembler.getManDownDetectionTimeout());
-        orderTasks.add(OrderTaskAssembler.getManDownPosStrategy());
-        orderTasks.add(OrderTaskAssembler.getManDownReportInterval());
-        orderTasks.add(OrderTaskAssembler.getManDownStartEventNotifyEnable());
-        orderTasks.add(OrderTaskAssembler.getManDownEndEventNotifyEnable());
-        LoRaLW004MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
+        cbManDownDetection.postDelayed(() -> {
+            List<OrderTask> orderTasks = new ArrayList<>();
+            orderTasks.add(OrderTaskAssembler.getManDownDetectionEnable());
+            orderTasks.add(OrderTaskAssembler.getManDownDetectionTimeout());
+            orderTasks.add(OrderTaskAssembler.getManDownPosStrategy());
+            orderTasks.add(OrderTaskAssembler.getManDownReportInterval());
+            orderTasks.add(OrderTaskAssembler.getManDownStartEventNotifyEnable());
+            orderTasks.add(OrderTaskAssembler.getManDownEndEventNotifyEnable());
+            LoRaLW004MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
+        }, 500);
     }
 
     @Subscribe(threadMode = ThreadMode.POSTING, priority = 300)

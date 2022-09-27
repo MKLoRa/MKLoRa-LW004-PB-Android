@@ -96,10 +96,12 @@ public class TimingModeActivity extends BaseActivity implements BaseQuickAdapter
         registerReceiver(mReceiver, filter);
         mReceiverTag = true;
         showSyncingProgressDialog();
-        List<OrderTask> orderTasks = new ArrayList<>();
-        orderTasks.add(OrderTaskAssembler.getTimePosStrategy());
-        orderTasks.add(OrderTaskAssembler.getTimePosReportPoints());
-        LoRaLW004MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
+        tvTimingPosStrategy.postDelayed(() -> {
+            List<OrderTask> orderTasks = new ArrayList<>();
+            orderTasks.add(OrderTaskAssembler.getTimePosStrategy());
+            orderTasks.add(OrderTaskAssembler.getTimePosReportPoints());
+            LoRaLW004MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
+        }, 500);
     }
 
 

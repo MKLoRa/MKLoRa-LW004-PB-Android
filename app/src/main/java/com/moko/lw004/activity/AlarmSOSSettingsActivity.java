@@ -73,13 +73,15 @@ public class AlarmSOSSettingsActivity extends BaseActivity {
         mTriggerModeValues.add("Long press 5s");
         EventBus.getDefault().register(this);
         showSyncingProgressDialog();
-        List<OrderTask> orderTasks = new ArrayList<>();
-        orderTasks.add(OrderTaskAssembler.getAlarmSosTriggerMode());
-        orderTasks.add(OrderTaskAssembler.getAlarmSosPosStrategy());
-        orderTasks.add(OrderTaskAssembler.getAlarmSosReportInterval());
-        orderTasks.add(OrderTaskAssembler.getAlarmSosStartEventNotifyEnable());
-        orderTasks.add(OrderTaskAssembler.getAlarmSosEndEventNotifyEnable());
-        LoRaLW004MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
+        tvTriggerMode.postDelayed(() -> {
+            List<OrderTask> orderTasks = new ArrayList<>();
+            orderTasks.add(OrderTaskAssembler.getAlarmSosTriggerMode());
+            orderTasks.add(OrderTaskAssembler.getAlarmSosPosStrategy());
+            orderTasks.add(OrderTaskAssembler.getAlarmSosReportInterval());
+            orderTasks.add(OrderTaskAssembler.getAlarmSosStartEventNotifyEnable());
+            orderTasks.add(OrderTaskAssembler.getAlarmSosEndEventNotifyEnable());
+            LoRaLW004MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
+        }, 500);
     }
 
     @Subscribe(threadMode = ThreadMode.POSTING, priority = 400)

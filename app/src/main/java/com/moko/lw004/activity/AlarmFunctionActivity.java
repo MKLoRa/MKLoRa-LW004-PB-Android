@@ -56,10 +56,12 @@ public class AlarmFunctionActivity extends BaseActivity {
         mValues.add("Alert");
         mValues.add("SOS");
         showSyncingProgressDialog();
-        List<OrderTask> orderTasks = new ArrayList<>();
-        orderTasks.add(OrderTaskAssembler.getAlarmType());
-        orderTasks.add(OrderTaskAssembler.getAlarmExitPressDuration());
-        LoRaLW004MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
+        tvAlarmType.postDelayed(() -> {
+            List<OrderTask> orderTasks = new ArrayList<>();
+            orderTasks.add(OrderTaskAssembler.getAlarmType());
+            orderTasks.add(OrderTaskAssembler.getAlarmExitPressDuration());
+            LoRaLW004MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
+        }, 500);
     }
 
     @Subscribe(threadMode = ThreadMode.POSTING, priority = 300)

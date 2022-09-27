@@ -10,7 +10,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.view.KeyEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -120,14 +119,16 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
             LoRaLW004MokoSupport.getInstance().enableBluetooth();
         } else {
             showSyncingProgressDialog();
-            List<OrderTask> orderTasks = new ArrayList<>();
-            // sync time after connect success;
-            orderTasks.add(OrderTaskAssembler.setTime());
-            // get lora params
-            orderTasks.add(OrderTaskAssembler.getLoraRegion());
-            orderTasks.add(OrderTaskAssembler.getLoraUploadMode());
-            orderTasks.add(OrderTaskAssembler.getLoraNetworkStatus());
-            LoRaLW004MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
+            frameContainer.postDelayed(() -> {
+                List<OrderTask> orderTasks = new ArrayList<>();
+                // sync time after connect success;
+                orderTasks.add(OrderTaskAssembler.setTime());
+                // get lora params
+                orderTasks.add(OrderTaskAssembler.getLoraRegion());
+                orderTasks.add(OrderTaskAssembler.getLoraUploadMode());
+                orderTasks.add(OrderTaskAssembler.getLoraNetworkStatus());
+                LoRaLW004MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
+            }, 500);
         }
     }
 
@@ -495,17 +496,16 @@ public class DeviceInfoActivity extends BaseActivity implements RadioGroup.OnChe
     }
 
     private void back() {
-        LoRaLW004MokoSupport.getInstance().disConnectBle();
-//        mIsClose = false;
+        frameContainer.postDelayed(() -> {
+            LoRaLW004MokoSupport.getInstance().disConnectBle();
+        }, 500);
     }
 
     @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
-            back();
-            return false;
-        }
-        return super.onKeyDown(keyCode, event);
+    public void onBackPressed() {
+        if (isWindowLocked())
+            return;
+        back();
     }
 
     @Override

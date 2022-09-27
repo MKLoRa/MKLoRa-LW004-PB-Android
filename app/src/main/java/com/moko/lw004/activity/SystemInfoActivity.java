@@ -87,16 +87,19 @@ public class SystemInfoActivity extends BaseActivity {
         registerReceiver(mReceiver, filter);
         mReceiverTag = true;
         showSyncingProgressDialog();
-        List<OrderTask> orderTasks = new ArrayList<>();
-        orderTasks.add(OrderTaskAssembler.getAdvName());
-        orderTasks.add(OrderTaskAssembler.getMac());
-        orderTasks.add(OrderTaskAssembler.getVoltage());
-        orderTasks.add(OrderTaskAssembler.getDeviceModel());
-        orderTasks.add(OrderTaskAssembler.getSoftwareVersion());
-        orderTasks.add(OrderTaskAssembler.getFirmwareVersion());
-        orderTasks.add(OrderTaskAssembler.getHardwareVersion());
-        orderTasks.add(OrderTaskAssembler.getManufacturer());
-        LoRaLW004MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
+        tvSoftwareVersion.postDelayed(() -> {
+            List<OrderTask> orderTasks = new ArrayList<>();
+            orderTasks.add(OrderTaskAssembler.getAdvName());
+            orderTasks.add(OrderTaskAssembler.getMac());
+            orderTasks.add(OrderTaskAssembler.getVoltage());
+            orderTasks.add(OrderTaskAssembler.getDeviceModel());
+            orderTasks.add(OrderTaskAssembler.getSoftwareVersion());
+            orderTasks.add(OrderTaskAssembler.getFirmwareVersion());
+            orderTasks.add(OrderTaskAssembler.getHardwareVersion());
+            orderTasks.add(OrderTaskAssembler.getManufacturer());
+            LoRaLW004MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
+        }, 500);
+        DfuServiceListenerHelper.registerProgressListener(this, mDfuProgressListener);
     }
 
     @Subscribe(threadMode = ThreadMode.POSTING, priority = 200)
@@ -239,6 +242,7 @@ public class SystemInfoActivity extends BaseActivity {
             unregisterReceiver(mReceiver);
         }
         EventBus.getDefault().unregister(this);
+        DfuServiceListenerHelper.unregisterProgressListener(this, mDfuProgressListener);
     }
 
     private LoadingMessageDialog mLoadingMessageDialog;
@@ -278,7 +282,7 @@ public class SystemInfoActivity extends BaseActivity {
         intent.setType("*/*");//设置类型，我这里是任意类型，任意后缀的可以这样写。
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         try {
-            startActivityForResult(Intent.createChooser(intent, "select file first!"), REQUEST_CODE_SELECT_FIRMWARE);
+            startActivityForResult(intent, REQUEST_CODE_SELECT_FIRMWARE);
         } catch (ActivityNotFoundException ex) {
             ToastUtils.showToast(this, "install file manager app");
         }
@@ -305,18 +309,6 @@ public class SystemInfoActivity extends BaseActivity {
         }
         setResult(RESULT_FIRST_USER);
         finish();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        DfuServiceListenerHelper.registerProgressListener(this, mDfuProgressListener);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        DfuServiceListenerHelper.unregisterProgressListener(this, mDfuProgressListener);
     }
 
     private boolean isUpgrade;

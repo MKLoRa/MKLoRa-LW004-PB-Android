@@ -240,7 +240,7 @@ public class LogDataActivity extends BaseActivity implements BaseQuickAdapter.On
             String address = "Development@mokotechnology.com";
             String title = "Debugger Log";
             String content = title;
-            Utils.sendEmail(LogDataActivity.this, address, content, title, "Choose Email Client", files);
+            Utils.sendEmail(LogDataActivity.this, address, content, title, files);
         }
     }
 

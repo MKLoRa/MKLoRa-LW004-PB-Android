@@ -165,24 +165,26 @@ public class LoRaConnSettingActivity extends BaseActivity implements CompoundBut
             LoRaLW004MokoSupport.getInstance().enableBluetooth();
         } else {
             showSyncingProgressDialog();
-            List<OrderTask> orderTasks = new ArrayList<>();
-            orderTasks.add(OrderTaskAssembler.getLoraUploadMode());
-            orderTasks.add(OrderTaskAssembler.getLoraDevEUI());
-            orderTasks.add(OrderTaskAssembler.getLoraAppEUI());
-            orderTasks.add(OrderTaskAssembler.getLoraAppKey());
-            orderTasks.add(OrderTaskAssembler.getLoraDevAddr());
-            orderTasks.add(OrderTaskAssembler.getLoraAppSKey());
-            orderTasks.add(OrderTaskAssembler.getLoraNwkSKey());
-            orderTasks.add(OrderTaskAssembler.getLoraRegion());
-            orderTasks.add(OrderTaskAssembler.getLoraMessageType());
-            orderTasks.add(OrderTaskAssembler.getLoraCH());
-            orderTasks.add(OrderTaskAssembler.getLoraDutyCycleEnable());
-            orderTasks.add(OrderTaskAssembler.getLoraDR());
-            orderTasks.add(OrderTaskAssembler.getLoraMaxRetransmissionTimes());
-            orderTasks.add(OrderTaskAssembler.getLoraAdrAckLimit());
-            orderTasks.add(OrderTaskAssembler.getLoraAdrAckDelay());
-            orderTasks.add(OrderTaskAssembler.getLoraUplinkStrategy());
-            LoRaLW004MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
+            etDevEui.postDelayed(() -> {
+                List<OrderTask> orderTasks = new ArrayList<>();
+                orderTasks.add(OrderTaskAssembler.getLoraUploadMode());
+                orderTasks.add(OrderTaskAssembler.getLoraDevEUI());
+                orderTasks.add(OrderTaskAssembler.getLoraAppEUI());
+                orderTasks.add(OrderTaskAssembler.getLoraAppKey());
+                orderTasks.add(OrderTaskAssembler.getLoraDevAddr());
+                orderTasks.add(OrderTaskAssembler.getLoraAppSKey());
+                orderTasks.add(OrderTaskAssembler.getLoraNwkSKey());
+                orderTasks.add(OrderTaskAssembler.getLoraRegion());
+                orderTasks.add(OrderTaskAssembler.getLoraMessageType());
+                orderTasks.add(OrderTaskAssembler.getLoraCH());
+                orderTasks.add(OrderTaskAssembler.getLoraDutyCycleEnable());
+                orderTasks.add(OrderTaskAssembler.getLoraDR());
+                orderTasks.add(OrderTaskAssembler.getLoraMaxRetransmissionTimes());
+                orderTasks.add(OrderTaskAssembler.getLoraAdrAckLimit());
+                orderTasks.add(OrderTaskAssembler.getLoraAdrAckDelay());
+                orderTasks.add(OrderTaskAssembler.getLoraUplinkStrategy());
+                LoRaLW004MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
+            }, 500);
         }
     }
 

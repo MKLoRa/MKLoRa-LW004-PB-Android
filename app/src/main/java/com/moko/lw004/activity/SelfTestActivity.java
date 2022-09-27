@@ -46,10 +46,12 @@ public class SelfTestActivity extends BaseActivity {
         ButterKnife.bind(this);
         EventBus.getDefault().register(this);
         showSyncingProgressDialog();
-        List<OrderTask> orderTasks = new ArrayList<>();
-        orderTasks.add(OrderTaskAssembler.getSelfTestStatus());
-        orderTasks.add(OrderTaskAssembler.getPCBAStatus());
-        LoRaLW004MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
+        tvSelftestStatus.postDelayed(() -> {
+            List<OrderTask> orderTasks = new ArrayList<>();
+            orderTasks.add(OrderTaskAssembler.getSelfTestStatus());
+            orderTasks.add(OrderTaskAssembler.getPCBAStatus());
+            LoRaLW004MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
+        }, 500);
     }
 
     @Subscribe(threadMode = ThreadMode.POSTING, priority = 300)

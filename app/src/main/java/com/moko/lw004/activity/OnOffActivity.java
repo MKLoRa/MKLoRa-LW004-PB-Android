@@ -51,10 +51,12 @@ public class OnOffActivity extends BaseActivity {
 
         EventBus.getDefault().register(this);
         showSyncingProgressDialog();
-        List<OrderTask> orderTasks = new ArrayList<>();
-        orderTasks.add(OrderTaskAssembler.getShutdownPayloadEnable());
-        orderTasks.add(OrderTaskAssembler.getBtnCloseEnable());
-        LoRaLW004MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
+        ivShutdownPayload.postDelayed(() -> {
+            List<OrderTask> orderTasks = new ArrayList<>();
+            orderTasks.add(OrderTaskAssembler.getShutdownPayloadEnable());
+            orderTasks.add(OrderTaskAssembler.getBtnCloseEnable());
+            LoRaLW004MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
+        }, 500);
     }
 
     @Subscribe(threadMode = ThreadMode.POSTING, priority = 200)
