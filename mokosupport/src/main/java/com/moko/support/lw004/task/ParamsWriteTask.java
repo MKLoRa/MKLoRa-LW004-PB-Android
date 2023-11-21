@@ -692,7 +692,7 @@ public class ParamsWriteTask extends OrderTask {
         response.responseValue = data;
     }
 
-    public void setBlePosNumber(@IntRange(from = 1, to = 5) int number) {
+    public void setBlePosNumber(@IntRange(from = 1, to = 15) int number) {
         data = new byte[]{
                 (byte) 0xED,
                 (byte) 0x01,
