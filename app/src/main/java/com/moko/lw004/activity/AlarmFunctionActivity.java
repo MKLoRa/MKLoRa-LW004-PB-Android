@@ -5,16 +5,13 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
-import android.widget.EditText;
-import android.widget.TextView;
 
 import com.moko.ble.lib.MokoConstants;
 import com.moko.ble.lib.event.ConnectStatusEvent;
 import com.moko.ble.lib.event.OrderTaskResponseEvent;
 import com.moko.ble.lib.task.OrderTask;
 import com.moko.ble.lib.task.OrderTaskResponse;
-import com.moko.lw004.R;
-import com.moko.lw004.R2;
+import com.moko.lw004.databinding.Lw004ActivityAlarmFunctionBinding;
 import com.moko.lw004.dialog.BottomDialog;
 import com.moko.lw004.dialog.LoadingMessageDialog;
 import com.moko.lw004.utils.ToastUtils;
@@ -30,16 +27,8 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-
 public class AlarmFunctionActivity extends BaseActivity {
-
-
-    @BindView(R2.id.tv_alarm_type)
-    TextView tvAlarmType;
-    @BindView(R2.id.et_exit_alarm_duration)
-    EditText etExitAlarmDuration;
+    private Lw004ActivityAlarmFunctionBinding mBind;
     private boolean savedParamsError;
 
     private int mSelected;
@@ -48,15 +37,15 @@ public class AlarmFunctionActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.lw004_activity_alarm_function);
-        ButterKnife.bind(this);
+        mBind = Lw004ActivityAlarmFunctionBinding.inflate(getLayoutInflater());
+        setContentView(mBind.getRoot());
         EventBus.getDefault().register(this);
         mValues = new ArrayList<>();
         mValues.add("NO");
         mValues.add("Alert");
         mValues.add("SOS");
         showSyncingProgressDialog();
-        tvAlarmType.postDelayed(() -> {
+        mBind.tvAlarmType.postDelayed(() -> {
             List<OrderTask> orderTasks = new ArrayList<>();
             orderTasks.add(OrderTaskAssembler.getAlarmType());
             orderTasks.add(OrderTaskAssembler.getAlarmExitPressDuration());
@@ -131,13 +120,13 @@ public class AlarmFunctionActivity extends BaseActivity {
                                         if (length > 0) {
                                             int type = value[4] & 0xFF;
                                             mSelected = type;
-                                            tvAlarmType.setText(mValues.get(type));
+                                            mBind.tvAlarmType.setText(mValues.get(type));
                                         }
                                         break;
                                     case KEY_ALARM_EXIT_PRESS_DURATION:
                                         if (length > 0) {
                                             int duration = value[4] & 0xFF;
-                                            etExitAlarmDuration.setText(String.valueOf(duration));
+                                            mBind.etExitAlarmDuration.setText(String.valueOf(duration));
                                         }
                                         break;
                                 }
@@ -185,7 +174,7 @@ public class AlarmFunctionActivity extends BaseActivity {
     }
 
     public void onSave(View view) {
-        final String durationStr = etExitAlarmDuration.getText().toString();
+        final String durationStr = mBind.etExitAlarmDuration.getText().toString();
         if (TextUtils.isEmpty(durationStr)) {
             ToastUtils.showToast(this, "Para error!");
             return;
@@ -222,7 +211,7 @@ public class AlarmFunctionActivity extends BaseActivity {
         dialog.setDatas(mValues, mSelected);
         dialog.setListener(value -> {
             mSelected = value;
-            tvAlarmType.setText(mValues.get(value));
+            mBind.tvAlarmType.setText(mValues.get(value));
         });
         dialog.show(getSupportFragmentManager());
     }

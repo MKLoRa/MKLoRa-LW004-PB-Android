@@ -3,8 +3,6 @@ package com.moko.lw004.activity;
 
 import android.os.Bundle;
 import android.view.View;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.moko.ble.lib.MokoConstants;
 import com.moko.ble.lib.event.ConnectStatusEvent;
@@ -12,7 +10,7 @@ import com.moko.ble.lib.event.OrderTaskResponseEvent;
 import com.moko.ble.lib.task.OrderTask;
 import com.moko.ble.lib.task.OrderTaskResponse;
 import com.moko.lw004.R;
-import com.moko.lw004.R2;
+import com.moko.lw004.databinding.Lw004ActivityAlarmAlertSettingsBinding;
 import com.moko.lw004.dialog.BottomDialog;
 import com.moko.lw004.dialog.LoadingMessageDialog;
 import com.moko.lw004.utils.ToastUtils;
@@ -28,20 +26,8 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-
 public class AlarmAlertSettingsActivity extends BaseActivity {
-
-
-    @BindView(R2.id.tv_trigger_mode)
-    TextView tvTriggerMode;
-    @BindView(R2.id.tv_alert_pos_strategy)
-    TextView tvAlertStrategy;
-    @BindView(R2.id.iv_alert_on_start)
-    ImageView ivAlertOnStart;
-    @BindView(R2.id.iv_alert_on_end)
-    ImageView ivAlertOnEnd;
+    private Lw004ActivityAlarmAlertSettingsBinding mBind;
     private ArrayList<String> mValues;
     private int mSelected;
     private ArrayList<String> mTriggerModeValues;
@@ -54,8 +40,8 @@ public class AlarmAlertSettingsActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.lw004_activity_alarm_alert_settings);
-        ButterKnife.bind(this);
+        mBind = Lw004ActivityAlarmAlertSettingsBinding.inflate(getLayoutInflater());
+        setContentView(mBind.getRoot());
         mValues = new ArrayList<>();
         mValues.add("BLE");
         mValues.add("GPS");
@@ -70,7 +56,7 @@ public class AlarmAlertSettingsActivity extends BaseActivity {
         mTriggerModeValues.add("Long press 5s");
         EventBus.getDefault().register(this);
         showSyncingProgressDialog();
-        tvTriggerMode.postDelayed(() -> {
+        mBind.tvTriggerMode.postDelayed(() -> {
             List<OrderTask> orderTasks = new ArrayList<>();
             orderTasks.add(OrderTaskAssembler.getAlarmAlertTriggerMode());
             orderTasks.add(OrderTaskAssembler.getAlarmAlertPosStrategy());
@@ -145,25 +131,25 @@ public class AlarmAlertSettingsActivity extends BaseActivity {
                                         if (length > 0) {
                                             int strategy = value[4] & 0xFF;
                                             mSelected = strategy;
-                                            tvAlertStrategy.setText(mValues.get(mSelected));
+                                            mBind.tvAlertPosStrategy.setText(mValues.get(mSelected));
                                         }
                                         break;
                                     case KEY_ALARM_ALERT_START_EVENT_NOTIFY_ENABLE:
                                         if (length > 0) {
                                             mAlertOnStartEnable = value[4] == 1;
-                                            ivAlertOnStart.setImageResource(mAlertOnStartEnable ? R.drawable.lw004_ic_checked : R.drawable.lw004_ic_unchecked);
+                                            mBind.ivAlertOnStart.setImageResource(mAlertOnStartEnable ? R.drawable.lw004_ic_checked : R.drawable.lw004_ic_unchecked);
                                         }
                                         break;
                                     case KEY_ALARM_ALERT_END_EVENT_NOTIFY_ENABLE:
                                         if (length > 0) {
                                             mAlertOnEndEnable = value[4] == 1;
-                                            ivAlertOnEnd.setImageResource(mAlertOnEndEnable ? R.drawable.lw004_ic_checked : R.drawable.lw004_ic_unchecked);
+                                            mBind.ivAlertOnEnd.setImageResource(mAlertOnEndEnable ? R.drawable.lw004_ic_checked : R.drawable.lw004_ic_unchecked);
                                         }
                                         break;
                                     case KEY_ALARM_ALERT_TRIGGER_MODE:
                                         if (length > 0) {
                                             mTriggerModeSelected = value[4] & 0xFF;
-                                            tvTriggerMode.setText(mTriggerModeValues.get(mTriggerModeSelected));
+                                            mBind.tvTriggerMode.setText(mTriggerModeValues.get(mTriggerModeSelected));
                                         }
                                         break;
                                 }
@@ -218,7 +204,7 @@ public class AlarmAlertSettingsActivity extends BaseActivity {
         dialog.setDatas(mValues, mSelected);
         dialog.setListener(value -> {
             mSelected = value;
-            tvAlertStrategy.setText(mValues.get(value));
+            mBind.tvAlertPosStrategy.setText(mValues.get(value));
             savedParamsError = false;
             showSyncingProgressDialog();
             LoRaLW004MokoSupport.getInstance().sendOrder(OrderTaskAssembler.setAlarmAlertPosStrategy(mSelected));
@@ -233,7 +219,7 @@ public class AlarmAlertSettingsActivity extends BaseActivity {
         dialog.setDatas(mTriggerModeValues, mTriggerModeSelected);
         dialog.setListener(value -> {
             mTriggerModeSelected = value;
-            tvTriggerMode.setText(mTriggerModeValues.get(value));
+            mBind.tvTriggerMode.setText(mTriggerModeValues.get(value));
             savedParamsError = false;
             showSyncingProgressDialog();
             LoRaLW004MokoSupport.getInstance().sendOrder(OrderTaskAssembler.setAlarmAlertTriggerMode(mTriggerModeSelected));

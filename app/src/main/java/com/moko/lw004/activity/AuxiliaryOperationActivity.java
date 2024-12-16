@@ -9,23 +9,22 @@ import com.moko.ble.lib.MokoConstants;
 import com.moko.ble.lib.event.ConnectStatusEvent;
 import com.moko.ble.lib.event.OrderTaskResponseEvent;
 import com.moko.ble.lib.task.OrderTaskResponse;
-import com.moko.lw004.R;
+import com.moko.lw004.databinding.Lw004ActivityAuxiliaryOperationBinding;
 import com.moko.lw004.dialog.LoadingMessageDialog;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import butterknife.ButterKnife;
-
 public class AuxiliaryOperationActivity extends BaseActivity {
 
+    private Lw004ActivityAuxiliaryOperationBinding mBind;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.lw004_activity_auxiliary_operation);
-        ButterKnife.bind(this);
+        mBind = Lw004ActivityAuxiliaryOperationBinding.inflate(getLayoutInflater());
+        setContentView(mBind.getRoot());
         EventBus.getDefault().register(this);
     }
 

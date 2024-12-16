@@ -9,9 +9,6 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
-import android.widget.CheckBox;
-import android.widget.EditText;
-import android.widget.TextView;
 
 import com.moko.ble.lib.MokoConstants;
 import com.moko.ble.lib.event.ConnectStatusEvent;
@@ -19,8 +16,7 @@ import com.moko.ble.lib.event.OrderTaskResponseEvent;
 import com.moko.ble.lib.task.OrderTask;
 import com.moko.ble.lib.task.OrderTaskResponse;
 import com.moko.ble.lib.utils.MokoUtils;
-import com.moko.lw004.R;
-import com.moko.lw004.R2;
+import com.moko.lw004.databinding.Lw004ActivityManDownDetectionBinding;
 import com.moko.lw004.dialog.BottomDialog;
 import com.moko.lw004.dialog.LoadingMessageDialog;
 import com.moko.lw004.utils.ToastUtils;
@@ -37,24 +33,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-
 public class ManDownDetectionActivity extends BaseActivity {
 
 
-    @BindView(R2.id.cb_man_down_detection)
-    CheckBox cbManDownDetection;
-    @BindView(R2.id.et_man_down_detection_timeout)
-    EditText etManDownDetectionTimeout;
-    @BindView(R2.id.tv_man_down_pos_strategy)
-    TextView tvManDownPosStrategy;
-    @BindView(R2.id.et_man_down_report_interval)
-    EditText etManDownReportInterval;
-    @BindView(R2.id.cb_man_down_on_start)
-    CheckBox cbManDownOnStart;
-    @BindView(R2.id.cb_man_down_on_end)
-    CheckBox cbManDownOnEnd;
+    private Lw004ActivityManDownDetectionBinding mBind;
     private boolean mReceiverTag = false;
     private boolean savedParamsError;
 
@@ -64,8 +46,8 @@ public class ManDownDetectionActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.lw004_activity_man_down_detection);
-        ButterKnife.bind(this);
+        mBind = Lw004ActivityManDownDetectionBinding.inflate(getLayoutInflater());
+        setContentView(mBind.getRoot());
         mValues = new ArrayList<>();
         mValues.add("BLE");
         mValues.add("GPS");
@@ -77,7 +59,7 @@ public class ManDownDetectionActivity extends BaseActivity {
         registerReceiver(mReceiver, filter);
         mReceiverTag = true;
         showSyncingProgressDialog();
-        cbManDownDetection.postDelayed(() -> {
+        mBind.cbManDownDetection.postDelayed(() -> {
             List<OrderTask> orderTasks = new ArrayList<>();
             orderTasks.add(OrderTaskAssembler.getManDownDetectionEnable());
             orderTasks.add(OrderTaskAssembler.getManDownDetectionTimeout());
@@ -159,40 +141,40 @@ public class ManDownDetectionActivity extends BaseActivity {
                                     case KEY_MAN_DOWN_DETECTION_ENABLE:
                                         if (length > 0) {
                                             int enable = value[4] & 0xFF;
-                                            cbManDownDetection.setChecked(enable == 1);
+                                            mBind.cbManDownDetection.setChecked(enable == 1);
                                         }
                                         break;
                                     case KEY_MAN_DOWN_DETECTION_TIMEOUT:
                                         if (length > 0) {
                                             byte[] timeoutBytes = Arrays.copyOfRange(value, 4, 4 + length);
                                             int timeout = MokoUtils.toInt(timeoutBytes);
-                                            etManDownDetectionTimeout.setText(String.valueOf(timeout));
+                                            mBind.etManDownDetectionTimeout.setText(String.valueOf(timeout));
                                         }
                                         break;
                                     case KEY_MAN_DOWN_POS_STRATEGY:
                                         if (length > 0) {
                                             int strategy = value[4] & 0xFF;
                                             mSelected = strategy;
-                                            tvManDownPosStrategy.setText(mValues.get(mSelected));
+                                            mBind.tvManDownPosStrategy.setText(mValues.get(mSelected));
                                         }
                                         break;
                                     case KEY_MAN_DOWN_REPORT_INTERVAL:
                                         if (length > 0) {
                                             byte[] intervalBytes = Arrays.copyOfRange(value, 4, 4 + length);
                                             int interval = MokoUtils.toInt(intervalBytes);
-                                            etManDownReportInterval.setText(String.valueOf(interval));
+                                            mBind.etManDownReportInterval.setText(String.valueOf(interval));
                                         }
                                         break;
                                     case KEY_MAN_DOWN_START_EVENT_NOTIFY_ENABLE:
                                         if (length > 0) {
                                             int enable = value[4] & 0xFF;
-                                            cbManDownOnStart.setChecked(enable == 1);
+                                            mBind.cbManDownOnStart.setChecked(enable == 1);
                                         }
                                         break;
                                     case KEY_MAN_DOWN_END_EVENT_NOTIFY_ENABLE:
                                         if (length > 0) {
                                             int enable = value[4] & 0xFF;
-                                            cbManDownOnEnd.setChecked(enable == 1);
+                                            mBind.cbManDownOnEnd.setChecked(enable == 1);
                                         }
                                         break;
                                 }
@@ -277,13 +259,13 @@ public class ManDownDetectionActivity extends BaseActivity {
     }
 
     private boolean isValid() {
-        final String timeoutStr = etManDownDetectionTimeout.getText().toString();
+        final String timeoutStr = mBind.etManDownDetectionTimeout.getText().toString();
         if (TextUtils.isEmpty(timeoutStr))
             return false;
         final int timeout = Integer.parseInt(timeoutStr);
         if (timeout < 1 || timeout > 120)
             return false;
-        final String intervalStr = etManDownReportInterval.getText().toString();
+        final String intervalStr = mBind.etManDownReportInterval.getText().toString();
         if (TextUtils.isEmpty(intervalStr))
             return false;
         final int interval = Integer.parseInt(intervalStr);
@@ -294,18 +276,18 @@ public class ManDownDetectionActivity extends BaseActivity {
     }
 
     private void saveParams() {
-        final String timeoutStr = etManDownDetectionTimeout.getText().toString();
+        final String timeoutStr = mBind.etManDownDetectionTimeout.getText().toString();
         final int timeout = Integer.parseInt(timeoutStr);
-        final String intervalStr = etManDownReportInterval.getText().toString();
+        final String intervalStr = mBind.etManDownReportInterval.getText().toString();
         final int interval = Integer.parseInt(intervalStr);
         savedParamsError = false;
         List<OrderTask> orderTasks = new ArrayList<>();
         orderTasks.add(OrderTaskAssembler.setManDownDetectionTimeout(timeout));
         orderTasks.add(OrderTaskAssembler.setManDownReportInterval(interval));
         orderTasks.add(OrderTaskAssembler.setManDownPosStrategy(mSelected));
-        orderTasks.add(OrderTaskAssembler.setManDownStartEventNotifyEnable(cbManDownOnStart.isChecked() ? 1 : 0));
-        orderTasks.add(OrderTaskAssembler.setManDownEndEventNotifyEnable(cbManDownOnEnd.isChecked() ? 1 : 0));
-        orderTasks.add(OrderTaskAssembler.setManDownDetectionEnable(cbManDownDetection.isChecked() ? 1 : 0));
+        orderTasks.add(OrderTaskAssembler.setManDownStartEventNotifyEnable(mBind.cbManDownOnStart.isChecked() ? 1 : 0));
+        orderTasks.add(OrderTaskAssembler.setManDownEndEventNotifyEnable(mBind.cbManDownOnEnd.isChecked() ? 1 : 0));
+        orderTasks.add(OrderTaskAssembler.setManDownDetectionEnable(mBind.cbManDownDetection.isChecked() ? 1 : 0));
         LoRaLW004MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
     }
 
@@ -316,7 +298,7 @@ public class ManDownDetectionActivity extends BaseActivity {
         dialog.setDatas(mValues, mSelected);
         dialog.setListener(value -> {
             mSelected = value;
-            tvManDownPosStrategy.setText(mValues.get(value));
+            mBind.tvManDownPosStrategy.setText(mValues.get(value));
         });
         dialog.show(getSupportFragmentManager());
     }

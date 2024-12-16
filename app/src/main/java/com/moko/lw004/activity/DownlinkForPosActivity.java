@@ -8,15 +8,13 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.TextView;
 
 import com.moko.ble.lib.MokoConstants;
 import com.moko.ble.lib.event.ConnectStatusEvent;
 import com.moko.ble.lib.event.OrderTaskResponseEvent;
 import com.moko.ble.lib.task.OrderTask;
 import com.moko.ble.lib.task.OrderTaskResponse;
-import com.moko.lw004.R;
-import com.moko.lw004.R2;
+import com.moko.lw004.databinding.Lw004ActivityDownlinkForPosBinding;
 import com.moko.lw004.dialog.BottomDialog;
 import com.moko.lw004.dialog.LoadingMessageDialog;
 import com.moko.lw004.utils.ToastUtils;
@@ -32,13 +30,9 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-
 public class DownlinkForPosActivity extends BaseActivity {
 
-    @BindView(R2.id.tv_downlink_pos_strategy)
-    TextView tvDownlinkPosStrategy;
+    private Lw004ActivityDownlinkForPosBinding mBind;
     private boolean mReceiverTag = false;
     private boolean savedParamsError;
     private ArrayList<String> mValues;
@@ -47,8 +41,8 @@ public class DownlinkForPosActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.lw004_activity_downlink_for_pos);
-        ButterKnife.bind(this);
+        mBind = Lw004ActivityDownlinkForPosBinding.inflate(getLayoutInflater());
+        setContentView(mBind.getRoot());
         mValues = new ArrayList<>();
         mValues.add("BLE");
         mValues.add("GPS");
@@ -60,7 +54,7 @@ public class DownlinkForPosActivity extends BaseActivity {
         registerReceiver(mReceiver, filter);
         mReceiverTag = true;
         showSyncingProgressDialog();
-        tvDownlinkPosStrategy.postDelayed(() -> {
+        mBind.tvDownlinkPosStrategy.postDelayed(() -> {
             List<OrderTask> orderTasks = new ArrayList<>();
             orderTasks.add(OrderTaskAssembler.getDownLinkPosStrategy());
             LoRaLW004MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
@@ -129,7 +123,7 @@ public class DownlinkForPosActivity extends BaseActivity {
                                         if (length > 0) {
                                             int strategy = value[4] & 0xFF;
                                             mSelected = strategy;
-                                            tvDownlinkPosStrategy.setText(mValues.get(mSelected));
+                                            mBind.tvDownlinkPosStrategy.setText(mValues.get(mSelected));
                                         }
                                         break;
                                 }
@@ -209,7 +203,7 @@ public class DownlinkForPosActivity extends BaseActivity {
         dialog.setDatas(mValues, mSelected);
         dialog.setListener(value -> {
             mSelected = value;
-            tvDownlinkPosStrategy.setText(mValues.get(value));
+            mBind.tvDownlinkPosStrategy.setText(mValues.get(value));
             savedParamsError = false;
             showSyncingProgressDialog();
             LoRaLW004MokoSupport.getInstance().sendOrder(OrderTaskAssembler.setDownLinkPosStrategy(mSelected));

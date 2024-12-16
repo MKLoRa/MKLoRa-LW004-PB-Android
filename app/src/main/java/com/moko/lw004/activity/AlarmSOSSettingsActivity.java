@@ -4,9 +4,6 @@ package com.moko.lw004.activity;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
-import android.widget.CheckBox;
-import android.widget.EditText;
-import android.widget.TextView;
 
 import com.moko.ble.lib.MokoConstants;
 import com.moko.ble.lib.event.ConnectStatusEvent;
@@ -14,8 +11,7 @@ import com.moko.ble.lib.event.OrderTaskResponseEvent;
 import com.moko.ble.lib.task.OrderTask;
 import com.moko.ble.lib.task.OrderTaskResponse;
 import com.moko.ble.lib.utils.MokoUtils;
-import com.moko.lw004.R;
-import com.moko.lw004.R2;
+import com.moko.lw004.databinding.Lw004ActivityAlarmSosSettingsBinding;
 import com.moko.lw004.dialog.BottomDialog;
 import com.moko.lw004.dialog.LoadingMessageDialog;
 import com.moko.lw004.utils.ToastUtils;
@@ -32,22 +28,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-
 public class AlarmSOSSettingsActivity extends BaseActivity {
 
-
-    @BindView(R2.id.tv_trigger_mode)
-    TextView tvTriggerMode;
-    @BindView(R2.id.tv_sos_pos_strategy)
-    TextView tvSOSStrategy;
-    @BindView(R2.id.cb_sos_on_start)
-    CheckBox cbSOSOnStart;
-    @BindView(R2.id.cb_sos_on_end)
-    CheckBox cbSOSOnEnd;
-    @BindView(R2.id.et_sos_report_interval)
-    EditText etSOSReportInterval;
+    private Lw004ActivityAlarmSosSettingsBinding mBind;
     private ArrayList<String> mValues;
     private int mSelected;
     private ArrayList<String> mTriggerModeValues;
@@ -57,8 +40,8 @@ public class AlarmSOSSettingsActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.lw004_activity_alarm_sos_settings);
-        ButterKnife.bind(this);
+        mBind = Lw004ActivityAlarmSosSettingsBinding.inflate(getLayoutInflater());
+        setContentView(mBind.getRoot());
         mValues = new ArrayList<>();
         mValues.add("BLE");
         mValues.add("GPS");
@@ -73,7 +56,7 @@ public class AlarmSOSSettingsActivity extends BaseActivity {
         mTriggerModeValues.add("Long press 5s");
         EventBus.getDefault().register(this);
         showSyncingProgressDialog();
-        tvTriggerMode.postDelayed(() -> {
+        mBind.tvTriggerMode.postDelayed(() -> {
             List<OrderTask> orderTasks = new ArrayList<>();
             orderTasks.add(OrderTaskAssembler.getAlarmSosTriggerMode());
             orderTasks.add(OrderTaskAssembler.getAlarmSosPosStrategy());
@@ -153,32 +136,32 @@ public class AlarmSOSSettingsActivity extends BaseActivity {
                                     case KEY_ALARM_SOS_REPORT_INTERVAL:
                                         if (length > 0) {
                                             int interval = MokoUtils.toInt(Arrays.copyOfRange(value, 4, 4 + length));
-                                            etSOSReportInterval.setText(String.valueOf(interval));
+                                            mBind.etSosReportInterval.setText(String.valueOf(interval));
                                         }
                                         break;
                                     case KEY_ALARM_SOS_POS_STRATEGY:
                                         if (length > 0) {
                                             int strategy = value[4] & 0xFF;
                                             mSelected = strategy;
-                                            tvSOSStrategy.setText(mValues.get(mSelected));
+                                            mBind.tvSosPosStrategy.setText(mValues.get(mSelected));
                                         }
                                         break;
                                     case KEY_ALARM_SOS_START_EVENT_NOTIFY_ENABLE:
                                         if (length > 0) {
                                             int enable = value[4] & 0xFF;
-                                            cbSOSOnStart.setChecked(enable == 1);
+                                            mBind.cbSosOnStart.setChecked(enable == 1);
                                         }
                                         break;
                                     case KEY_ALARM_SOS_END_EVENT_NOTIFY_ENABLE:
                                         if (length > 0) {
                                             int enable = value[4] & 0xFF;
-                                            cbSOSOnEnd.setChecked(enable == 1);
+                                            mBind.cbSosOnEnd.setChecked(enable == 1);
                                         }
                                         break;
                                     case KEY_ALARM_SOS_TRIGGER_MODE:
                                         if (length > 0) {
                                             mTriggerModeSelected = value[4] & 0xFF;
-                                            tvTriggerMode.setText(mTriggerModeValues.get(mTriggerModeSelected));
+                                            mBind.tvTriggerMode.setText(mTriggerModeValues.get(mTriggerModeSelected));
                                         }
                                         break;
                                 }
@@ -202,7 +185,7 @@ public class AlarmSOSSettingsActivity extends BaseActivity {
     }
 
     private boolean isValid() {
-        final String intervalStr = etSOSReportInterval.getText().toString();
+        final String intervalStr = mBind.etSosReportInterval.getText().toString();
         if (TextUtils.isEmpty(intervalStr))
             return false;
         final int interval = Integer.parseInt(intervalStr);
@@ -213,14 +196,14 @@ public class AlarmSOSSettingsActivity extends BaseActivity {
     }
 
     private void saveParams() {
-        final String intervalStr = etSOSReportInterval.getText().toString();
+        final String intervalStr = mBind.etSosReportInterval.getText().toString();
         final int interval = Integer.parseInt(intervalStr);
         savedParamsError = false;
         List<OrderTask> orderTasks = new ArrayList<>();
         orderTasks.add(OrderTaskAssembler.setAlarmSOSPosStrategy(mSelected));
         orderTasks.add(OrderTaskAssembler.setAlarmSOSReportInterval(interval));
-        orderTasks.add(OrderTaskAssembler.setAlarmSOSStartEventNotifyEnable(cbSOSOnStart.isChecked() ? 1 : 0));
-        orderTasks.add(OrderTaskAssembler.setAlarmSOSEndEventNotifyEnable(cbSOSOnEnd.isChecked() ? 1 : 0));
+        orderTasks.add(OrderTaskAssembler.setAlarmSOSStartEventNotifyEnable(mBind.cbSosOnStart.isChecked() ? 1 : 0));
+        orderTasks.add(OrderTaskAssembler.setAlarmSOSEndEventNotifyEnable(mBind.cbSosOnEnd.isChecked() ? 1 : 0));
         orderTasks.add(OrderTaskAssembler.setAlarmSOSTriggerMode(mTriggerModeSelected));
         LoRaLW004MokoSupport.getInstance().sendOrder(orderTasks.toArray(new OrderTask[]{}));
     }
@@ -268,7 +251,7 @@ public class AlarmSOSSettingsActivity extends BaseActivity {
         dialog.setDatas(mValues, mSelected);
         dialog.setListener(value -> {
             mSelected = value;
-            tvSOSStrategy.setText(mValues.get(value));
+            mBind.tvSosPosStrategy.setText(mValues.get(value));
 
         });
         dialog.show(getSupportFragmentManager());
@@ -281,7 +264,7 @@ public class AlarmSOSSettingsActivity extends BaseActivity {
         dialog.setDatas(mTriggerModeValues, mTriggerModeSelected);
         dialog.setListener(value -> {
             mTriggerModeSelected = value;
-            tvTriggerMode.setText(mTriggerModeValues.get(value));
+            mBind.tvTriggerMode.setText(mTriggerModeValues.get(value));
         });
         dialog.show(getSupportFragmentManager());
     }

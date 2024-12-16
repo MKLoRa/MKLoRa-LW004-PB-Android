@@ -6,34 +6,20 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.moko.ble.lib.task.OrderTask;
 import com.moko.lw004.R;
-import com.moko.lw004.R2;
 import com.moko.lw004.activity.DeviceInfoActivity;
+import com.moko.lw004.databinding.Lw004FragmentDeviceBinding;
 import com.moko.lw004.dialog.BottomDialog;
 import com.moko.support.lw004.LoRaLW004MokoSupport;
 import com.moko.support.lw004.OrderTaskAssembler;
 
 import java.util.ArrayList;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-
 public class DeviceFragment extends Fragment {
     private static final String TAG = DeviceFragment.class.getSimpleName();
-    @BindView(R2.id.tv_time_zone)
-    TextView tvTimeZone;
-    @BindView(R2.id.tv_low_power_prompt)
-    TextView tvLowPowerPrompt;
-    @BindView(R2.id.tv_low_power_prompt_tips)
-    TextView tvLowPowerPromptTips;
-    @BindView(R2.id.iv_low_power_payload)
-    ImageView ivLowPowerPayload;
-    @BindView(R2.id.tv_vibration_intensity)
-    TextView tvVibrationIntensity;
+    private Lw004FragmentDeviceBinding mBind;
 
     private ArrayList<String> mTimeZones;
     private int mSelectedTimeZone;
@@ -59,8 +45,7 @@ public class DeviceFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         Log.i(TAG, "onCreateView: ");
-        View view = inflater.inflate(R.layout.lw004_fragment_device, container, false);
-        ButterKnife.bind(this, view);
+        mBind = Lw004FragmentDeviceBinding.inflate(inflater, container, false);
         activity = (DeviceInfoActivity) getActivity();
         mTimeZones = new ArrayList<>();
         for (int i = -24; i <= 28; i++) {
@@ -92,12 +77,12 @@ public class DeviceFragment extends Fragment {
         mVibrationIntensity.add("Low");
         mVibrationIntensity.add("Medium");
         mVibrationIntensity.add("High");
-        return view;
+        return mBind.getRoot();
     }
 
     public void setTimeZone(int timeZone) {
         mSelectedTimeZone = timeZone + 24;
-        tvTimeZone.setText(mTimeZones.get(mSelectedTimeZone));
+        mBind.tvTimeZone.setText(mTimeZones.get(mSelectedTimeZone));
     }
 
     public void showTimeZoneDialog() {
@@ -105,7 +90,7 @@ public class DeviceFragment extends Fragment {
         dialog.setDatas(mTimeZones, mSelectedTimeZone);
         dialog.setListener(value -> {
             mSelectedTimeZone = value;
-            tvTimeZone.setText(mTimeZones.get(value));
+            mBind.tvTimeZone.setText(mTimeZones.get(value));
             activity.showSyncingProgressDialog();
             ArrayList<OrderTask> orderTasks = new ArrayList<>();
             orderTasks.add(OrderTaskAssembler.setTimeZone(value - 24));
@@ -117,8 +102,8 @@ public class DeviceFragment extends Fragment {
 
     public void setLowPower(int lowPower) {
         mSelectedLowPowerPrompt = (lowPower / 10) - 1;
-        tvLowPowerPrompt.setText(mLowPowerPrompts.get(mSelectedLowPowerPrompt));
-        tvLowPowerPromptTips.setText(getString(R.string.low_power_prompt_tips_lw004, mLowPowerPrompts.get(mSelectedLowPowerPrompt)));
+        mBind.tvLowPowerPrompt.setText(mLowPowerPrompts.get(mSelectedLowPowerPrompt));
+        mBind.tvLowPowerPromptTips.setText(getString(R.string.low_power_prompt_tips_lw004, mLowPowerPrompts.get(mSelectedLowPowerPrompt)));
     }
 
     public void showLowPowerDialog() {
@@ -126,8 +111,8 @@ public class DeviceFragment extends Fragment {
         dialog.setDatas(mLowPowerPrompts, mSelectedLowPowerPrompt);
         dialog.setListener(value -> {
             mSelectedLowPowerPrompt = value;
-            tvLowPowerPrompt.setText(mLowPowerPrompts.get(value));
-            tvLowPowerPromptTips.setText(getString(R.string.low_power_prompt_tips_lw004, mLowPowerPrompts.get(value)));
+            mBind.tvLowPowerPrompt.setText(mLowPowerPrompts.get(value));
+            mBind.tvLowPowerPromptTips.setText(getString(R.string.low_power_prompt_tips_lw004, mLowPowerPrompts.get(value)));
             activity.showSyncingProgressDialog();
             ArrayList<OrderTask> orderTasks = new ArrayList<>();
             orderTasks.add(OrderTaskAssembler.setLowPowerPercent((value + 1) * 10));
@@ -150,10 +135,10 @@ public class DeviceFragment extends Fragment {
     public void setLowPowerPayload(int enable) {
         if (enable == 1) {
             mLowPowerPayloadEnable = true;
-            ivLowPowerPayload.setImageResource(R.drawable.lw004_ic_checked);
+            mBind.ivLowPowerPayload.setImageResource(R.drawable.lw004_ic_checked);
         } else {
             mLowPowerPayloadEnable = false;
-            ivLowPowerPayload.setImageResource(R.drawable.lw004_ic_unchecked);
+            mBind.ivLowPowerPayload.setImageResource(R.drawable.lw004_ic_unchecked);
         }
     }
 
@@ -167,7 +152,7 @@ public class DeviceFragment extends Fragment {
         } else if (intensity == 80) {
             mSelectedVibrationIntensity = 3;
         }
-        tvVibrationIntensity.setText(mVibrationIntensity.get(mSelectedVibrationIntensity));
+        mBind.tvVibrationIntensity.setText(mVibrationIntensity.get(mSelectedVibrationIntensity));
     }
 
     public void onVibrationIntensity() {
@@ -175,7 +160,7 @@ public class DeviceFragment extends Fragment {
         dialog.setDatas(mVibrationIntensity, mSelectedVibrationIntensity);
         dialog.setListener(value -> {
             mSelectedVibrationIntensity = value;
-            tvVibrationIntensity.setText(mVibrationIntensity.get(value));
+            mBind.tvVibrationIntensity.setText(mVibrationIntensity.get(value));
             int intensity = 0;
             if (mSelectedVibrationIntensity == 1) {
                 intensity = 10;

@@ -3,7 +3,6 @@ package com.moko.lw004.activity;
 
 import android.os.Bundle;
 import android.view.View;
-import android.widget.ImageView;
 
 import com.moko.ble.lib.MokoConstants;
 import com.moko.ble.lib.event.ConnectStatusEvent;
@@ -11,7 +10,7 @@ import com.moko.ble.lib.event.OrderTaskResponseEvent;
 import com.moko.ble.lib.task.OrderTask;
 import com.moko.ble.lib.task.OrderTaskResponse;
 import com.moko.lw004.R;
-import com.moko.lw004.R2;
+import com.moko.lw004.databinding.Lw004ActivityOnOffSettingsBinding;
 import com.moko.lw004.dialog.AlertMessageDialog;
 import com.moko.lw004.dialog.LoadingMessageDialog;
 import com.moko.lw004.utils.ToastUtils;
@@ -27,18 +26,10 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-
 public class OnOffActivity extends BaseActivity {
 
 
-    @BindView(R2.id.iv_shutdown_payload)
-    ImageView ivShutdownPayload;
-    @BindView(R2.id.iv_off_by_button)
-    ImageView ivOffByButton;
-    @BindView(R2.id.iv_power_off)
-    ImageView ivPowerOff;
+    private Lw004ActivityOnOffSettingsBinding mBind;
     private boolean savedParamsError;
     private boolean mShutdownPayloadEnable;
     private boolean mOFFByButtonEnable;
@@ -46,12 +37,12 @@ public class OnOffActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.lw004_activity_on_off_settings);
-        ButterKnife.bind(this);
+        mBind = Lw004ActivityOnOffSettingsBinding.inflate(getLayoutInflater());
+        setContentView(mBind.getRoot());
 
         EventBus.getDefault().register(this);
         showSyncingProgressDialog();
-        ivShutdownPayload.postDelayed(() -> {
+        mBind.ivShutdownPayload.postDelayed(() -> {
             List<OrderTask> orderTasks = new ArrayList<>();
             orderTasks.add(OrderTaskAssembler.getShutdownPayloadEnable());
             orderTasks.add(OrderTaskAssembler.getBtnCloseEnable());
@@ -122,14 +113,14 @@ public class OnOffActivity extends BaseActivity {
                                         if (length > 0) {
                                             int enable = value[4] & 0xFF;
                                             mOFFByButtonEnable = enable == 1;
-                                            ivOffByButton.setImageResource(mOFFByButtonEnable ? R.drawable.lw004_ic_checked : R.drawable.lw004_ic_unchecked);
+                                            mBind.ivOffByButton.setImageResource(mOFFByButtonEnable ? R.drawable.lw004_ic_checked : R.drawable.lw004_ic_unchecked);
                                         }
                                         break;
                                     case KEY_SHUTDOWN_PAYLOAD_ENABLE:
                                         if (length > 0) {
                                             int enable = value[4] & 0xFF;
                                             mShutdownPayloadEnable = enable == 1;
-                                            ivShutdownPayload.setImageResource(mShutdownPayloadEnable ? R.drawable.lw004_ic_checked : R.drawable.lw004_ic_unchecked);
+                                            mBind.ivShutdownPayload.setImageResource(mShutdownPayloadEnable ? R.drawable.lw004_ic_checked : R.drawable.lw004_ic_unchecked);
                                         }
                                         break;
                                 }

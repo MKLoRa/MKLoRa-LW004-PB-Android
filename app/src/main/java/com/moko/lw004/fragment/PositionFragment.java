@@ -7,14 +7,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.moko.lw004.R;
 import com.moko.lw004.activity.DeviceInfoActivity;
-
-import butterknife.ButterKnife;
+import com.moko.lw004.databinding.Lw004FragmentPosBinding;
 
 public class PositionFragment extends Fragment {
     private static final String TAG = PositionFragment.class.getSimpleName();
 
+    private Lw004FragmentPosBinding mBind;
     private DeviceInfoActivity activity;
 
     public PositionFragment() {
@@ -30,9 +29,8 @@ public class PositionFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         Log.i(TAG, "onCreateView: ");
-        View view = inflater.inflate(R.layout.lw004_fragment_pos, container, false);
-        ButterKnife.bind(this, view);
+        mBind = Lw004FragmentPosBinding.inflate(inflater, container, false);
         activity = (DeviceInfoActivity) getActivity();
-        return view;
+        return mBind.getRoot();
     }
 }

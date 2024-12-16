@@ -4,7 +4,6 @@ package com.moko.lw004.activity;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
-import android.widget.EditText;
 
 import com.moko.ble.lib.MokoConstants;
 import com.moko.ble.lib.event.ConnectStatusEvent;
@@ -12,8 +11,7 @@ import com.moko.ble.lib.event.OrderTaskResponseEvent;
 import com.moko.ble.lib.task.OrderTask;
 import com.moko.ble.lib.task.OrderTaskResponse;
 import com.moko.ble.lib.utils.MokoUtils;
-import com.moko.lw004.R;
-import com.moko.lw004.R2;
+import com.moko.lw004.databinding.Lw004ActivityPosGpsBinding;
 import com.moko.lw004.dialog.LoadingMessageDialog;
 import com.moko.lw004.utils.ToastUtils;
 import com.moko.support.lw004.LoRaLW004MokoSupport;
@@ -29,16 +27,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-
 public class PosGpsFixActivity extends BaseActivity {
 
 
-    @BindView(R2.id.et_pdop_limit)
-    EditText etPdopLimit;
-    @BindView(R2.id.et_position_timeout)
-    EditText etPositionTimeout;
+    private Lw004ActivityPosGpsBinding mBind;
 
     private boolean savedParamsError;
 
@@ -46,11 +38,11 @@ public class PosGpsFixActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.lw004_activity_pos_gps);
-        ButterKnife.bind(this);
+        mBind = Lw004ActivityPosGpsBinding.inflate(getLayoutInflater());
+        setContentView(mBind.getRoot());
         EventBus.getDefault().register(this);
         showSyncingProgressDialog();
-        etPdopLimit.postDelayed(() -> {
+        mBind.etPdopLimit.postDelayed(() -> {
             List<OrderTask> orderTasks = new ArrayList<>();
             orderTasks.add(OrderTaskAssembler.getGPSPosTimeout());
             orderTasks.add(OrderTaskAssembler.getGPSPDOPLimit());
@@ -125,13 +117,13 @@ public class PosGpsFixActivity extends BaseActivity {
                                         if (length > 0) {
                                             byte[] timeoutBytes = Arrays.copyOfRange(value, 4, 4 + length);
                                             int timeout = MokoUtils.toInt(timeoutBytes);
-                                            etPositionTimeout.setText(String.valueOf(timeout));
+                                            mBind.etPositionTimeout.setText(String.valueOf(timeout));
                                         }
                                         break;
                                     case KEY_GPS_PDOP_LIMIT:
                                         if (length > 0) {
                                             int limit = value[4] & 0xFF;
-                                            etPdopLimit.setText(String.valueOf(limit));
+                                            mBind.etPdopLimit.setText(String.valueOf(limit));
                                         }
                                         break;
                                 }
@@ -155,14 +147,14 @@ public class PosGpsFixActivity extends BaseActivity {
     }
 
     private boolean isValid() {
-        final String posTimeoutStr = etPositionTimeout.getText().toString();
+        final String posTimeoutStr = mBind.etPositionTimeout.getText().toString();
         if (TextUtils.isEmpty(posTimeoutStr))
             return false;
         final int posTimeout = Integer.parseInt(posTimeoutStr);
         if (posTimeout < 60 || posTimeout > 600) {
             return false;
         }
-        final String pdopLimitStr = etPdopLimit.getText().toString();
+        final String pdopLimitStr = mBind.etPdopLimit.getText().toString();
         if (TextUtils.isEmpty(pdopLimitStr))
             return false;
         final int pdopLimit = Integer.parseInt(pdopLimitStr);
@@ -175,9 +167,9 @@ public class PosGpsFixActivity extends BaseActivity {
 
 
     private void saveParams() {
-        final String posTimeoutStr = etPositionTimeout.getText().toString();
+        final String posTimeoutStr = mBind.etPositionTimeout.getText().toString();
         final int posTimeout = Integer.parseInt(posTimeoutStr);
-        final String pdopLimitStr = etPdopLimit.getText().toString();
+        final String pdopLimitStr = mBind.etPdopLimit.getText().toString();
         final int pdopLimit = Integer.parseInt(pdopLimitStr);
         savedParamsError = false;
         List<OrderTask> orderTasks = new ArrayList<>();
