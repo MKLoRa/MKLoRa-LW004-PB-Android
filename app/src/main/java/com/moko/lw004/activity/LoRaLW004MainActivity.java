@@ -28,7 +28,6 @@ import com.moko.lw004.R;
 import com.moko.lw004.adapter.DeviceListAdapter;
 import com.moko.lw004.databinding.Lw004ActivityMainBinding;
 import com.moko.lw004.dialog.AlertMessageDialog;
-import com.moko.lw004.dialog.LoadingDialog;
 import com.moko.lw004.dialog.LoadingMessageDialog;
 import com.moko.lw004.dialog.PasswordDialog;
 import com.moko.lw004.dialog.ScanFilterDialog;
@@ -495,19 +494,6 @@ public class LoRaLW004MainActivity extends BaseActivity implements MokoScanDevic
                 }
             }
         }
-    }
-
-    private LoadingDialog mLoadingDialog;
-
-    private void showLoadingProgressDialog() {
-        mLoadingDialog = new LoadingDialog();
-        mLoadingDialog.show(getSupportFragmentManager());
-
-    }
-
-    private void dismissLoadingProgressDialog() {
-        if (mLoadingDialog != null)
-            mLoadingDialog.dismissAllowingStateLoss();
     }
 
     private LoadingMessageDialog mLoadingMessageDialog;

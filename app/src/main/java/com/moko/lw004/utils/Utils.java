@@ -24,7 +24,7 @@ import androidx.core.content.FileProvider;
 
 public class Utils {
 
-    public static void sendEmail(Context context, String address, String body, String subject, File... files) {
+    public static void sendEmail(Context context, String address, String body, String subject, String tips, File... files) {
         if (files.length == 0) {
             return;
         }
@@ -69,6 +69,7 @@ public class Utils {
         intent.putExtra(Intent.EXTRA_EMAIL, addresses);
         intent.putExtra(Intent.EXTRA_SUBJECT, subject);
         intent.setType("message/rfc822");
+        Intent.createChooser(intent, tips);
         if (intent.resolveActivity(context.getPackageManager()) != null) {
             context.startActivity(intent);
         }
